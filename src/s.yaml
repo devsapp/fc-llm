@@ -10,8 +10,8 @@ vars:
     {{ if llmModel !== 'chatglm2-6b-int4'  }} 
     nasConfig: auto
     logConfig: auto
-    {{/if}}
     vpcConfig: auto
+    {{/if}}
     internetAccess: true
 services:
   {{ if llmModel !== 'chatglm2-6b-int4'  }} 
