@@ -214,7 +214,7 @@ services:
           chatServerUrl: '${chatglm6b-server.output.url.custom_domain[0].domain}'
           adminUrl: ${fc-nas-admin2.output.url.custom_domain[0].domain}
           LLM_MODEL: ${vars.LLM_MODEL}
-         APP_NAME: ${vars.APP_NAME}
+          APP_NAME: ${vars.APP_NAME}
         codeUri: ./code/portal-code
         caPort: 
       triggers:
