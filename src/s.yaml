@@ -190,14 +190,11 @@ services:
        pre-deploy:
         - run: npm i
           path: ./code/portal-code
+        - run: npm run build
+          path: ./code/portal-code
     props:
       region: ${vars.region}
-      service:
-        name: ${vars.service.name}
-        description: 
-        internetAccess: true
-        nasConfig: auto
-        logConfig: auto
+      service: ${vars.service}
       function:
         name: chatglm-portal
         description: Native recording handler
@@ -216,8 +213,8 @@ services:
             /opt/nodejs18/bin::/usr/local/bin/apache-maven/bin:/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ruby/bin:/opt/bin:/code:/code/bin
           chatServerUrl: '${chatglm6b-server.output.url.custom_domain[0].domain}'
           adminUrl: ${fc-nas-admin2.output.url.custom_domain[0].domain}
-          baseModel: 'int4'
-          modelConfigPath: ${vars.modelConfigPath}
+          LLM_MODEL: ${vars.LLM_MODEL}
+         APP_NAME: ${vars.APP_NAME}
         codeUri: ./code/portal-code
         caPort: 
       triggers:
