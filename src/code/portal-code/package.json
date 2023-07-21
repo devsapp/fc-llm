@@ -1,0 +1,32 @@
+{
+  "name": "app-express",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "preview": "vite preview"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+   
+    "axios": "^1.4.0",
+    "bluebird": "^3.7.2",
+    "body-parser": "^1.20.2",
+    "classnames": "^2.3.2",
+    "connect-timeout": "^1.9.0",
+    "dayjs": "^1.11.7",
+    "ejs": "^3.1.9",
+    "express": "^4.18.2",
+    "express-http-proxy": "^1.6.3",
+    "fs-extra": "^11.1.1",
+    "highlight.js": "^11.8.0",
+    "http-proxy-middleware": "^2.0.6"
+  },
+  "devDependencies": {
+
+  }
+}

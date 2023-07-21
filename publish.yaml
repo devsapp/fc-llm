@@ -1,0 +1,56 @@
+
+Type: Application
+Name: fc-llm
+Provider:
+  - 阿里云
+Version: dev
+Description: 部署大模型及相关应用到函数计算
+HomePage: 项目首页地址
+Tags: #标签详情
+  - 部署函数
+Category: Web框架
+Parameters:
+  type: object
+  additionalProperties: false # 不允许增加其他属性
+  required: # 必填项
+    - region
+    - imageUrl
+  properties:
+    region:
+      title: 地域
+      type: string
+      default: 
+      description: 创建应用所在的地区
+      enum:
+        - cn-beijing
+        - cn-hangzhou
+        - cn-shanghai
+        - cn-shenzhen
+    appName:
+      title: 应用
+      type: string
+      default: chatglm2-6b
+      description: 大语言模型的应用，包含独立问答和语料库增强的问答场景
+      enum:
+        - chatglm2-6b
+        - langchain-ChatGLM
+    llmModel:
+      title: 大语言模型
+      type: string
+      default: chatglm2-6b-int4
+      description: 选择基础的大语言模型
+      enum:
+        - chatglm2-6b-int4
+        - chatglm2-6b
+    serviceName:
+      title: 服务名
+      type: string
+      default: fc-llm
+      pattern: "^[a-zA-Z_][a-zA-Z0-9-_:/.]{0,127}$"
+      description: 您可以根据需要设置不同的服务名，同一个服务会共享部分第三方云产品资源
+    apiEnabled:
+      title: 启用 API 模式
+      type: boolean
+      default: true
+      description: |+
+        将开启 api 模式。

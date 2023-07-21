@@ -1,0 +1,241 @@
+edition: 1.0.0
+name: fc-llm
+vars:
+  region: '{{ region }}'
+  LLM_MODEL: '{{ llmModel }}' # 基础模型及配置路径
+  APP_NAME: '{{ appName }}'   #  chatglm2-b6、app-chatglm2-6b-langchain、app-chatglm2-6b-api
+  service:
+    name: '{{ serviceName }}'
+    description: '将开源模型部署到函数计算'
+    {{ if llmModel !== 'chatglm2-6b-int4'  }} 
+    nasConfig: auto
+    logConfig: auto
+    {{/if}}
+    vpcConfig: auto
+    internetAccess: true
+services:
+  {{ if llmModel !== 'chatglm2-6b-int4'  }} 
+  fc-nas-init:
+    component: fc
+    props:
+      region: ${vars.region} 
+      service: ${vars.service}
+      function:
+        name: "nas-init"
+        description: 'Prepare nas'
+        codeUri: './code/source-code/init'
+        runtime: python3.9
+        timeout: 1200
+        memorySize: 3072
+        cpu: 2.0
+        diskSize: 512
+        instanceConcurrency: 1
+        handler: index.handler
+        environmentVariables:
+          modelPath: ${vars.LLM_MODEL}
+          region: ${vars.region}
+  fc-model-download:
+    component: fc
+    actions:
+      pre-deploy: 
+        - run: npm i 
+          path: ./code/source-code/download-model2nas
+    props:
+      region: ${vars.region} # 关于变量的使用方法，可以参考：https://www.serverless-devs.com/serverless-devs/yaml#变量赋值
+      service: ${vars.service}
+      function:
+        name: "model-download"
+        description: 'download model to nas'
+        codeUri: './code/source-code/download-model2nas'
+        runtime: nodejs16
+        timeout: 600
+        memorySize: 3072
+        cpu: 2.0
+        diskSize: 512
+        instanceConcurrency: 1
+        handler: index.handler
+        environmentVariables:
+          modelPath: ${vars.LLM_MODEL}
+          region: ${vars.region}
+  # keep-warm: # 辅助函数, 2 min 定时预热
+  #   component: fc # 组件名称
+  #   actions:
+  #     post-deploy:
+  #       - component: fc invoke
+  #   props: # 组件的属性值
+  #     region: ${vars.region}
+  #     service: ${vars.service}
+  #     function:
+  #       name: keep-warm
+  #       description: 'Serverless Devs Web Framework Helper Function'
+  #       codeUri: './code/source-code/keep-warm'
+  #       handler: index.handler
+  #       runtime: python3
+  #       timeout: 120
+  #       memorySize: 128
+  #       cpu: 0.1
+  #       diskSize: 512
+  #       instanceConcurrency: 1
+  #       environmentVariables:
+  #         KODBOX_URL: ${fc-nas-admin2.output.url.custom_domain[0].domain}
+  #     triggers:
+  #       - name: timerTrigger
+  #         type: timer
+  #         # qualifier: LATEST    
+  #         config:
+  #           payload: '{}'
+  #           cronExpression: '@every 2m'
+  #           enable: false
+  fc-nas-admin: 
+    component: fc 
+    actions: 
+      post-deploy: 
+        - component: fc invoke --service-name ${fc-nas-init.output.service.name}
+            --function-name nas-init
+        - component: fc invoke --service-name ${fc-model-download.output.service.name}
+            --function-name model-download
+        - component: fc nas upload -r ./code/${vars.APP_NAME} /mnt/auto/chatglm/${vars.APP_NAME}  #上传 llm的启动程序代码
+          path: ./  
+        - component: fc nas upload -r ./code/${vars.LLM_MODEL} /mnt/auto/${vars.vars.LLM_MODEL} # 上传 llm的配置代码
+          path: ./  
+        - component: fc ondemand put --qualifier LATEST --max 1 
+    props: # 组件的属性值
+      region: ${vars.region}
+      service: ${vars.service}
+      function:
+        name: "admin"
+        description: 'kodbox  Function'
+        codeUri: './code/source-code/kodbox'
+        runtime: custom
+        timeout: 7200
+        memorySize: 3072
+        cpu: 2.0
+        diskSize: 512
+        instanceConcurrency: 16
+        caPort: 80
+        customRuntimeConfig:
+          command:
+            - bash
+          args:
+            - '-c'
+            - '/code/start.sh'
+      triggers:
+        - name: httpTrigger
+          type: http
+          config:
+            authType: anonymous
+            methods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - HEAD
+              - OPTIONS
+      customDomains:
+        - domainName: auto
+          protocol: HTTP
+          routeConfigs:
+            - path: /*
+  {{/if}}
+  chatglm6b-server:  #容器服务
+    component: fc
+    props:
+      region: ${vars.region}
+      service: ${vars.service}
+      function:
+        handler: index.handler
+        timeout: 600
+        diskSize: 10240
+        caPort: 7860
+        instanceType: fc.gpu.tesla.1
+        runtime: custom-container
+        cpu: 8
+        customContainerConfig:
+          args: ''
+          accelerationType: Default
+          image: 'registry.cn-hangzhou.aliyuncs.com/serverlessdevshanxie/llm:v4'
+          accelerationInfo:
+            status: Preparing
+          command: ''
+          webServerMode: true
+        instanceConcurrency: 100
+        memorySize: 32768
+        environmentVariables:
+          LLM_MODEL: ${vars.LLM_MODEL}
+          APP_NAME: ${vars.APP_NAME}
+        gpuMemorySize: 16384
+        name: chatglm
+        asyncConfiguration: {}
+      triggers:
+        - name: defaultTrigger
+          description: ''
+          type: http
+          qualifier: LATEST
+          config:
+            methods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+            authType: anonymous
+            disableURLInternet: false
+      customDomains:
+        - domainName: auto
+          protocol: HTTP
+          routeConfigs:
+            - path: /*
+  chatglm-portal:
+    component: fc
+    actions:
+       pre-deploy:
+        - run: npm i
+          path: ./code/portal-code
+    props:
+      region: ${vars.region}
+      service:
+        name: ${vars.service.name}
+        description: 
+        internetAccess: true
+        nasConfig: auto
+        logConfig: auto
+      function:
+        name: chatglm-portal
+        description: Native recording handler
+        timeout: 3000
+        layers:
+          - acs:fc:cn-hangzhou:official:layers/Nodejs18/versions/1
+        instanceType: c1
+        runtime: custom.debian10
+        instanceConcurrency: 5
+        memorySize: 3072
+        cpu: 2.0
+        diskSize: 512
+        environmentVariables:
+          NODE_PATH: /opt/nodejs/node_modules
+          PATH: >-
+            /opt/nodejs18/bin::/usr/local/bin/apache-maven/bin:/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ruby/bin:/opt/bin:/code:/code/bin
+          chatServerUrl: '${chatglm6b-server.output.url.custom_domain[0].domain}'
+          adminUrl: ${fc-nas-admin2.output.url.custom_domain[0].domain}
+          baseModel: 'int4'
+          modelConfigPath: ${vars.modelConfigPath}
+        codeUri: ./code/portal-code
+        caPort: 
+      triggers:
+        - name: defaultTrigger
+          type: http
+          config:
+            authType: anonymous
+            methods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - HEAD
+              - OPTIONS
+      customDomains:
+        - domainName: auto
+          protocol: HTTP
+          routeConfigs:
+            - path: /*
+              serviceName: ${vars.service.name}
+              functionName:  chatglm-portal
