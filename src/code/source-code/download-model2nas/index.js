@@ -12,10 +12,10 @@ exports.handler = async (_event, _context, callback) => {
     const appDir = basePath + process.env.appPath;
     const modelDir = basePath + process.env.modelPath;
     if (!fs.existsSync(appDir)) {
-        fs.mkdirSync(appDir);
+        fs.ensureDirSync(appDir);
     }
     if (!fs.existsSync(modelDir)) {
-        fs.mkdirSync(modelDir);
+        fs.ensureDirSync(modelDir);
     }
     const modelFile = path.join(modelDir, filename);
 
