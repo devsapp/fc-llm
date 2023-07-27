@@ -3,37 +3,19 @@ name: fc-llm
 vars:
   region: '{{ region }}'
   LLM_MODEL: '{{ llmModel }}' # 基础模型及配置路径
-  APP_NAME: '{{ appName }}'   #  chatglm2-b6、app-chatglm2-6b-langchain、app-chatglm2-6b-api
+  APP_NAME: '{{ appName }}'   # chatglm2-6b、app-chatglm2-6b-langchain、app-chatglm2-6b-api
+
   service:
     name: '{{ serviceName }}'
     description: '将开源模型部署到函数计算'
-    {{ if llmModel !== 'chatglm2-6b-int4'  }} 
+    {{ if !(llmModel == 'chatglm2-6b-int4' &&  appName == 'chatglm2-6b'  }} 
     nasConfig: auto
     logConfig: auto
     vpcConfig: auto
     {{/if}}
     internetAccess: true
 services:
-  {{ if llmModel !== 'chatglm2-6b-int4'  }} 
-  fc-nas-init:
-    component: fc
-    props:
-      region: ${vars.region} 
-      service: ${vars.service}
-      function:
-        name: "nas-init"
-        description: 'Prepare nas'
-        codeUri: './code/source-code/init'
-        runtime: python3.9
-        timeout: 1200
-        memorySize: 3072
-        cpu: 2.0
-        diskSize: 512
-        instanceConcurrency: 1
-        handler: index.handler
-        environmentVariables:
-          modelPath: ${vars.LLM_MODEL}
-          region: ${vars.region}
+  {{ if  !(llmModel == 'chatglm2-6b-int4' &&  appName == 'chatglm2-6b' }} 
   fc-model-download:
     component: fc
     actions:
@@ -57,88 +39,22 @@ services:
         environmentVariables:
           modelPath: ${vars.LLM_MODEL}
           region: ${vars.region}
-  # keep-warm: # 辅助函数, 2 min 定时预热
-  #   component: fc # 组件名称
-  #   actions:
-  #     post-deploy:
-  #       - component: fc invoke
-  #   props: # 组件的属性值
-  #     region: ${vars.region}
-  #     service: ${vars.service}
-  #     function:
-  #       name: keep-warm
-  #       description: 'Serverless Devs Web Framework Helper Function'
-  #       codeUri: './code/source-code/keep-warm'
-  #       handler: index.handler
-  #       runtime: python3
-  #       timeout: 120
-  #       memorySize: 128
-  #       cpu: 0.1
-  #       diskSize: 512
-  #       instanceConcurrency: 1
-  #       environmentVariables:
-  #         KODBOX_URL: ${fc-nas-admin2.output.url.custom_domain[0].domain}
-  #     triggers:
-  #       - name: timerTrigger
-  #         type: timer
-  #         # qualifier: LATEST    
-  #         config:
-  #           payload: '{}'
-  #           cronExpression: '@every 2m'
-  #           enable: false
-  fc-nas-admin: 
-    component: fc 
-    actions: 
-      post-deploy: 
-        - component: fc invoke --service-name ${fc-nas-init.output.service.name}
-            --function-name nas-init
-        - component: fc invoke --service-name ${fc-model-download.output.service.name}
-            --function-name model-download
-        - component: fc nas upload -r ./code/${vars.APP_NAME} /mnt/auto/chatglm/${vars.APP_NAME}  #上传 llm的启动程序代码
-          path: ./  
-        - component: fc nas upload -r ./code/${vars.LLM_MODEL} /mnt/auto/${vars.vars.LLM_MODEL} # 上传 llm的配置代码
-          path: ./  
-        - component: fc ondemand put --qualifier LATEST --max 1 
-    props: # 组件的属性值
-      region: ${vars.region}
-      service: ${vars.service}
-      function:
-        name: "admin"
-        description: 'kodbox  Function'
-        codeUri: './code/source-code/kodbox'
-        runtime: custom
-        timeout: 7200
-        memorySize: 3072
-        cpu: 2.0
-        diskSize: 512
-        instanceConcurrency: 16
-        caPort: 80
-        customRuntimeConfig:
-          command:
-            - bash
-          args:
-            - '-c'
-            - '/code/start.sh'
-      triggers:
-        - name: httpTrigger
-          type: http
-          config:
-            authType: anonymous
-            methods:
-              - GET
-              - POST
-              - PUT
-              - DELETE
-              - HEAD
-              - OPTIONS
-      customDomains:
-        - domainName: auto
-          protocol: HTTP
-          routeConfigs:
-            - path: /*
   {{/if}}
+  
+
   chatglm6b-server:  #容器服务
     component: fc
+    {{ if  !(llmModel == 'chatglm2-6b-int4' &&  appName == 'chatglm2-6b' }} 
+    actions:
+      post-deploy: 
+        - component: fc nas upload -r ./code/{{appName}} /mnt/auto/llm/{{appName}}
+          path: ./ 
+        - component: fc nas upload -r ./code/${vars.llmModel} /mnt/auto/llm/${llmModel}  # chatglm2-6b-int4 | chatglm2-6b
+        {{ if  llmModel == 'chatglm2-6b-int4' }} 
+        - component: fc invoke --service-name ${fc-model-download.output.service.name}  # int4的模型由于较小，可以放在部署态完成
+            --function-name model-download
+        {{ /if }}
+    {{/if}}
     props:
       region: ${vars.region}
       service: ${vars.service}
@@ -153,7 +69,7 @@ services:
         customContainerConfig:
           args: ''
           accelerationType: Default
-          image: 'registry.cn-hangzhou.aliyuncs.com/serverlessdevshanxie/llm:v4'
+          image: 'registry.${vars.region}.aliyuncs.com/serverlessdevshanxie/llm:v12'
           accelerationInfo:
             status: Preparing
           command: ''
@@ -184,6 +100,7 @@ services:
           protocol: HTTP
           routeConfigs:
             - path: /*
+
   chatglm-portal:
     component: fc
     actions:
