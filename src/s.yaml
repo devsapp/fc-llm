@@ -51,8 +51,7 @@ services:
           path: ./ 
         - component: fc nas upload -r ./code/${vars.llmModel} /mnt/auto/llm/${llmModel}  # chatglm2-6b-int4 | chatglm2-6b
         {{ if  llmModel == 'chatglm2-6b-int4' }} 
-        - component: fc invoke --service-name ${fc-model-download.output.service.name}  # int4的模型由于较小，可以放在部署态完成
-            --function-name model-download
+        - component: fc invoke --service-name ${fc-model-download.output.service.name}  --function-name model-download # int4的模型由于较小，可以放在部署态完成
         {{ /if }}
     {{/if}}
     props:
