@@ -47,12 +47,10 @@ services:
     {{ if llmModel !== 'chatglm2-6b-int4' ||  appName !== 'chatglm2-6b'  }} 
     actions:
       post-deploy: 
+        - component: fc invoke --service-name ${fc-model-download.output.service.name}  --function-name model-download 
         - component: fc nas upload -r ./code/{{appName}} /mnt/auto/llm/{{appName}}
           path: ./ 
         - component: fc nas upload -r ./code/${vars.llmModel} /mnt/auto/llm/${llmModel}  # chatglm2-6b-int4 | chatglm2-6b
-        {{ if  llmModel == 'chatglm2-6b-int4' }} 
-        - component: fc invoke --service-name ${fc-model-download.output.service.name}  --function-name model-download # int4的模型由于较小，可以放在部署态完成
-        {{ /if }}
     {{/if}}
     props:
       region: ${vars.region}
@@ -78,6 +76,7 @@ services:
         environmentVariables:
           LLM_MODEL: ${vars.LLM_MODEL}
           APP_NAME: ${vars.APP_NAME}
+          WEB_SERVER: gradio
         gpuMemorySize: 16384
         name: chatglm
         asyncConfiguration: {}
