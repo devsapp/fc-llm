@@ -24,7 +24,7 @@ services:
           path: ./code/source-code/download-model2nas
       {{ if llmModel !== 'chatglm2-6b-int4' ||  appName !== 'chatglm2-6b-webui'  }} 
       post-deploy: 
-        - component: fc invoke --service-name ${fc-model-download.output.service.name}  --function-name model-download 
+        - component: fc invoke --service-name ${vars.service.name}  --function-name model-download 
         - component: fc nas upload -r ./code/${vars.APP_NAME} /mnt/auto/llm/${vars.APP_NAME}
           path: ./ 
         - component: fc nas upload -r ./code/${vars.LLM_MODEL} /mnt/auto/llm/${vars.LLM_MODEL}  # chatglm2-6b-int4 | chatglm2-6b
