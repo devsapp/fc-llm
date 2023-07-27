@@ -38,8 +38,8 @@ const CHATGLM2_6B_MODELS = [{
   name: 'pytorch_model-00007-of-00007.bin',
   sha256: '316e007bc727f3cbba432d29e1d3e35ac8ef8eb52df4db9f0609d091a43c69cb'
 }];
-
-const FC_MODEL_PATH = process.env.modelConfigPath || '/mnt/auto/chatglm2-6b-model';
+const BASE_LLM_PATH = '/mnt/auto/llm'
+const FC_MODEL_PATH = process.env.LLM_MODEL || '';
 
 function calculateFileHash(filePath, algorithm = 'sha256') {
   return new Promise((resolve, reject) => {
@@ -112,7 +112,7 @@ app.get('/', (req, res) => {
 
 app.delete('/model/:name', (req, res) => {
   const name = req.params.name;
-  const filePath = path.join(FC_MODEL_PATH, name);
+  const filePath = path.join(BASE_LLM_PATH + '/' + FC_MODEL_PATH, name);
   const fileExist = fs.existsSync(filePath);
   if (fileExist) {
     fs.unlinkSync(filePath);
@@ -128,7 +128,7 @@ app.get('/baseModel', (req, res) => {
 app.get('/models', (req, res) => {
   const modelsStatusPromise = CHATGLM2_6B_MODELS.map((item) => {
     const name = item.name;
-    const filePath = path.join(FC_MODEL_PATH, name)
+    const filePath = path.join(BASE_LLM_PATH + '/' + FC_MODEL_PATH, name);
     const fileData = { name, total: 1, currentSize: 0, downLoading: 0 };
     const fileExist = fs.existsSync(filePath);
     if (fileExist) {
@@ -147,10 +147,15 @@ app.get('/models', (req, res) => {
 app.get('/modelReady', async (req, res) => {
   const checkHash = req.query.checkHash;
   let modelReady = true;
+
+  if(process.env.LLM_MODEL === 'chatglm2-6b-int4') {
+    res.send(modelReady);
+    return;
+  }
   for (const item of CHATGLM2_6B_MODELS) {
     const name = item.name;
     const sha256 = item.sha256;
-    const filePath = path.join(FC_MODEL_PATH, name)
+    const filePath = path.join(BASE_LLM_PATH + '/' + FC_MODEL_PATH, name);
     const fileExist = fs.existsSync(filePath);
     if (!fileExist) {
       modelReady = '';
@@ -182,7 +187,7 @@ app.post('/downloadModel', async (req, res) => {
   const region = process.env.region || 'cn-hangzhou';
   const sourceFileUrl = `https://serverless-ai-models-${region}.oss-${region}-internal.aliyuncs.com/chatglm2-6b/${modelName}`;
   const filename = path.basename(sourceFileUrl);
-  const chatglmModelFile = path.join(FC_MODEL_PATH, filename);
+  const chatglmModelFile = path.join(BASE_LLM_PATH + '/' + FC_MODEL_PATH, filename);
   const fileExist = fs.existsSync(chatglmModelFile);
 
   if (fileExist) {
@@ -198,7 +203,7 @@ app.post('/downloadModel', async (req, res) => {
   res.setHeader('Content-type', 'text/event-stream;charset=utf-8');
   res.flushHeaders();
 
-  download(sourceFileUrl, FC_MODEL_PATH, res);
+  download(sourceFileUrl, BASE_LLM_PATH + '/' + FC_MODEL_PATH, res);
 
 });
 

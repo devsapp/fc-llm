@@ -48,9 +48,9 @@ services:
     actions:
       post-deploy: 
         - component: fc invoke --service-name ${fc-model-download.output.service.name}  --function-name model-download 
-        - component: fc nas upload -r ./code/{{appName}} /mnt/auto/llm/{{appName}}
+        - component: fc nas upload -r ./code/${vars.APP_NAME} /mnt/auto/llm/${vars.APP_NAME}
           path: ./ 
-        - component: fc nas upload -r ./code/${vars.llmModel} /mnt/auto/llm/${llmModel}  # chatglm2-6b-int4 | chatglm2-6b
+        - component: fc nas upload -r ./code/${vars.LLM_MODEL} /mnt/auto/llm/${vars.LLM_MODEL}  # chatglm2-6b-int4 | chatglm2-6b
     {{/if}}
     props:
       region: ${vars.region}

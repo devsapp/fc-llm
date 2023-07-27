@@ -9,7 +9,7 @@ exports.handler = async (_event, _context, callback) => {
     const fileUrl = `https://serverless-ai-models-${region}.oss-${region}-internal.aliyuncs.com/chatglm2-6b-int4/pytorch_model.bin`;
     const filename = path.basename(fileUrl);
     const downloadDir = '/mnt/auto/llm/' + process.env.modelPath;
-    if(!fs.ensureDirSync(downloadDir)) {
+    if(!fs.existsSync(downloadDir)) {
         fs.mkdirSync(downloadDir);
     }
     const modelFile = path.join(downloadDir, filename);

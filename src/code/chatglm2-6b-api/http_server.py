@@ -2,6 +2,7 @@
 from typing import List
 from fastapi import FastAPI
 from fastapi.responses import StreamingResponse
+from fastapi.responses import RedirectResponse
 from pydantic import BaseModel  # pylint: disable = no-name-in-module
 import uvicorn
 import model
@@ -29,6 +30,10 @@ class ChatResponse(BaseModel):
     """Function printing python version."""
     answer: str
 
+@app.get("/", include_in_schema=False)
+async def redirect_to_docs():
+    response = RedirectResponse(url='/docs')
+    return response
 
 @app.post("/chat", response_model=ChatResponse)
 async def chat(req: ChatRequest):
