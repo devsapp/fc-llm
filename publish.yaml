@@ -32,8 +32,8 @@ Parameters:
       default: chatglm2-6b
       description: 大语言模型的应用
       enum:
-        - pg-chatglm2-6b
-        - chatglm2-6b
+        - pg-chatglm2-6b-webui
+        - chatglm2-6b-webui
         - chatglm2-6b-api
     llmModel:
       title: 大语言模型
@@ -42,7 +42,7 @@ Parameters:
       description: 选择基础的大语言模型
       enum:
         - chatglm2-6b-int4
-        - model-chatglm2-6b
+        - chatglm2-6b
     serviceName:
       title: 服务名
       type: string

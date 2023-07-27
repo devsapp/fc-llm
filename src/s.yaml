@@ -8,14 +8,14 @@ vars:
   service:
     name: '{{ serviceName }}'
     description: '将开源模型部署到函数计算'
-    {{ if llmModel !== 'chatglm2-6b-int4' ||  appName !== 'chatglm2-6b'  }} 
+    {{ if llmModel !== 'chatglm2-6b-int4' ||  appName !== 'chatglm2-6b-webui'  }} 
     nasConfig: auto
     logConfig: auto
     vpcConfig: auto
     {{/if}}
     internetAccess: true
 services:
-  {{ if llmModel !== 'chatglm2-6b-int4' ||  appName !== 'chatglm2-6b'  }} 
+  {{ if llmModel !== 'chatglm2-6b-int4' ||  appName !== 'chatglm2-6b-webui'  }} 
   fc-model-download:
     component: fc
     actions:
@@ -45,7 +45,7 @@ services:
   
   chatglm6b-server:  #容器服务
     component: fc
-    {{ if llmModel !== 'chatglm2-6b-int4' ||  appName !== 'chatglm2-6b'  }} 
+    {{ if llmModel !== 'chatglm2-6b-int4' ||  appName !== 'chatglm2-6b-webui'  }} 
     actions:
       post-deploy: 
         - component: fc invoke --service-name ${fc-model-download.output.service.name}  --function-name model-download 
@@ -76,7 +76,12 @@ services:
         memorySize: 32768
         environmentVariables:
           LLM_MODEL: ${vars.LLM_MODEL}
+          {{ if llmModel !== 'chatglm2-6b-int4' ||  appName !== 'chatglm2-6b-webui'  }} 
           APP_NAME: ${vars.APP_NAME}
+          {{/if}}
+          {{ if llmModel === 'chatglm2-6b-int4' &&  appName !== 'chatglm2-6b-webui'  }} 
+          APP_NAME: chatglm2-6b
+          {{/if}}
           WEB_SERVER: gradio
         gpuMemorySize: 16384
         name: chatglm
@@ -150,7 +155,7 @@ services:
             - path: /*
               serviceName: ${vars.service.name}
               functionName:  chatglm-portal
-  {{ if appName == 'pg-chatglm2-6b'  }} 
+  {{ if appName == 'pg-chatglm2-6b-webui'  }} 
   embedding-fc-model-download:
     component: fc
     actions:

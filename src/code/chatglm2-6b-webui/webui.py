@@ -6,8 +6,12 @@ import os
 
 current_path = os.getcwd()
 print(current_path)
-tokenizer = AutoTokenizer.from_pretrained(current_path + "/chatglm2-6b-int4-model", trust_remote_code=True)
-model = AutoModel.from_pretrained(current_path + "/chatglm2-6b-int4-model", trust_remote_code=True).cuda()
+
+llm_model = os.environ.get("LLM_MODEL",  "chatglm2-6b-int4")
+tokenizer = AutoTokenizer.from_pretrained(
+    current_path + "/"+llm_model, trust_remote_code=True)
+model = AutoModel.from_pretrained(
+    current_path + "/" + llm_model, trust_remote_code=True).cuda()
 # 多显卡支持，使用下面两行代替上面一行，将num_gpus改为你实际的显卡数量
 # from utils import load_model_on_gpus
 # model = load_model_on_gpus("THUDM/chatglm2-6b", num_gpus=2)
@@ -95,9 +99,12 @@ with gr.Blocks() as demo:
                 submitBtn = gr.Button("Submit", variant="primary")
         with gr.Column(scale=1):
             emptyBtn = gr.Button("Clear History")
-            max_length = gr.Slider(0, 32768, value=8192, step=1.0, label="Maximum length", interactive=True)
-            top_p = gr.Slider(0, 1, value=0.8, step=0.01, label="Top P", interactive=True)
-            temperature = gr.Slider(0, 1, value=0.95, step=0.01, label="Temperature", interactive=True)
+            max_length = gr.Slider(
+                0, 32768, value=8192, step=1.0, label="Maximum length", interactive=True)
+            top_p = gr.Slider(0, 1, value=0.8, step=0.01,
+                              label="Top P", interactive=True)
+            temperature = gr.Slider(
+                0, 1, value=0.95, step=0.01, label="Temperature", interactive=True)
 
     history = gr.State([])
     past_key_values = gr.State(None)
@@ -106,11 +113,12 @@ with gr.Blocks() as demo:
                     [chatbot, history, past_key_values], show_progress=True)
     submitBtn.click(reset_user_input, [], [user_input])
 
-    emptyBtn.click(reset_state, outputs=[chatbot, history, past_key_values], show_progress=True)
+    emptyBtn.click(reset_state, outputs=[
+                   chatbot, history, past_key_values], show_progress=True)
 
 
 demo.queue().launch(server_name='0.0.0.0',
-         server_port=7860,
-         show_api=False,
-         share=False,
-         inbrowser=False)
+                    server_port=7860,
+                    show_api=False,
+                    share=False,
+                    inbrowser=False)
