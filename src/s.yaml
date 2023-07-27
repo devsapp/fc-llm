@@ -256,7 +256,7 @@ services:
         environmentVariables:
           CHATGLM_EMBEDDING_URL: ${embedding-service.output.url.custom_domain[0].domain}
           CHATGLM_BASE_URL: ${chatglm6b-server.output.url.custom_domain[0].domain}
-          PGVECTOR_API_URL: http://120.26.105.194:5002
+          PGVECTOR_API_URL: 
         name: pgvector_llm
         asyncConfiguration: {}
       triggers:
