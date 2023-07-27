@@ -19,7 +19,7 @@ Parameters:
     region:
       title: 地域
       type: string
-      default: 
+      default: cn-hangzhou
       description: 创建应用所在的地区
       enum:
         - cn-beijing
@@ -30,10 +30,10 @@ Parameters:
       title: 应用
       type: string
       default: chatglm2-6b
-      description: 大语言模型的应用，包含独立问答和语料库增强的问答场景
+      description: 大语言模型的应用
       enum:
         - chatglm2-6b
-        - langchain-ChatGLM
+        - chatglm2-6b-api
     llmModel:
       title: 大语言模型
       type: string
@@ -48,9 +48,3 @@ Parameters:
       default: fc-llm
       pattern: "^[a-zA-Z_][a-zA-Z0-9-_:/.]{0,127}$"
       description: 您可以根据需要设置不同的服务名，同一个服务会共享部分第三方云产品资源
-    apiEnabled:
-      title: 启用 API 模式
-      type: boolean
-      default: true
-      description: |+
-        将开启 api 模式。
