@@ -29,7 +29,7 @@ Parameters:
     appName:
       title: 应用
       type: string
-      default: chatglm2-6b
+      default: chatglm2-6b-webui
       description: 大语言模型的应用
       enum:
         - pg-chatglm2-6b-webui
