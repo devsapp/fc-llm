@@ -38,6 +38,7 @@ services:
         handler: index.handler
         environmentVariables:
           modelPath: ${vars.LLM_MODEL}
+          appPath: ${vars.APP_NAME}
           region: ${vars.region}
   {{/if}}
   

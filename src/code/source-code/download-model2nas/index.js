@@ -8,13 +8,18 @@ exports.handler = async (_event, _context, callback) => {
     const region = process.env.region || 'cn-hangzhou'
     const fileUrl = `https://serverless-ai-models-${region}.oss-${region}-internal.aliyuncs.com/chatglm2-6b-int4/pytorch_model.bin`;
     const filename = path.basename(fileUrl);
-    const downloadDir = '/mnt/auto/llm/' + process.env.modelPath;
-    if(!fs.existsSync(downloadDir)) {
-        fs.mkdirSync(downloadDir);
+    const basePath = '/mnt/auto/llm/';
+    const appDir = basePath + process.env.appPath;
+    const modelDir = basePath + process.env.modelPath;
+    if (!fs.existsSync(appDir)) {
+        fs.mkdirSync(appDir);
     }
-    const modelFile = path.join(downloadDir, filename);
+    if (!fs.existsSync(modelDir)) {
+        fs.mkdirSync(modelDir);
+    }
+    const modelFile = path.join(modelDir, filename);
 
-    if(process.env.modelPath !== 'chatglm2-6b-int4') {
+    if (process.env.modelPath !== 'chatglm2-6b-int4') {
         callback(null, 'do not need to download models');
         return;
     }
@@ -22,7 +27,7 @@ exports.handler = async (_event, _context, callback) => {
         callback(null, 'fiExist');
     } else {
         await downloads(fileUrl, {
-            dest: downloadDir,
+            dest: modelDir,
             filename,
             extract: true
         });
