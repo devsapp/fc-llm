@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@serverless-devs/downloads": "^0.0.1"
+    "@serverless-devs/downloads": "^0.0.1",
+    "fs-extra": "^11.1.1"
   }
 }
