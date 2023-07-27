@@ -3,7 +3,7 @@ Type: Application
 Name: fc-llm
 Provider:
   - 阿里云
-Version: 0.0.1
+Version: dev
 Description: 部署大模型及相关应用到函数计算
 HomePage: 项目首页地址
 Tags: #标签详情
@@ -32,6 +32,7 @@ Parameters:
       default: chatglm2-6b
       description: 大语言模型的应用
       enum:
+        - pg-chatglm2-6b
         - chatglm2-6b
         - chatglm2-6b-api
     llmModel:
@@ -40,8 +41,8 @@ Parameters:
       default: chatglm2-6b-int4
       description: 选择基础的大语言模型
       enum:
-        - chatglm2-6b-int4
-        - chatglm2-6b
+        - model-chatglm2-6b-int4
+        - model-chatglm2-6b
     serviceName:
       title: 服务名
       type: string

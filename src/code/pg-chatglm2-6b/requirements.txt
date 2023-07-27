@@ -1,0 +1,15 @@
+torch
+langchain
+transformers
+accelerate
+icetk
+cpm_kernels
+peft
+bitsandbytes
+einops
+bs4
+
+fastapi
+uvicorn
+grpcio>=1.54.2
+protobuf>=4.23.2

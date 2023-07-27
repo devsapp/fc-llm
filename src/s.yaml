@@ -8,14 +8,14 @@ vars:
   service:
     name: '{{ serviceName }}'
     description: '将开源模型部署到函数计算'
-    {{ if llmModel !== 'chatglm2-6b-int4' ||  appName !== 'chatglm2-6b'  }} 
+    {{ if llmModel !== 'model-chatglm2-6b-int4' ||  appName !== 'chatglm2-6b'  }} 
     nasConfig: auto
     logConfig: auto
     vpcConfig: auto
     {{/if}}
     internetAccess: true
 services:
-  {{ if llmModel !== 'chatglm2-6b-int4' ||  appName !== 'chatglm2-6b'  }} 
+  {{ if llmModel !== 'model-chatglm2-6b-int4' ||  appName !== 'chatglm2-6b'  }} 
   fc-model-download:
     component: fc
     actions:
@@ -42,10 +42,10 @@ services:
           region: ${vars.region}
   {{/if}}
   
-
+  
   chatglm6b-server:  #容器服务
     component: fc
-    {{ if llmModel !== 'chatglm2-6b-int4' ||  appName !== 'chatglm2-6b'  }} 
+    {{ if llmModel !== 'model-chatglm2-6b-int4' ||  appName !== 'chatglm2-6b'  }} 
     actions:
       post-deploy: 
         - component: fc invoke --service-name ${fc-model-download.output.service.name}  --function-name model-download 
@@ -150,3 +150,131 @@ services:
             - path: /*
               serviceName: ${vars.service.name}
               functionName:  chatglm-portal
+  {{ if appName == 'pg-chatglm2-6b'  }} 
+  embedding-fc-model-download:
+    component: fc
+    actions:
+      pre-deploy:
+        - run: npm i
+          path: ./embedding-service/source-code/download-model2nas
+    props:
+      region: ${vars.region} # 关于变量的使用方法，可以参考：https://www.serverless-devs.com/serverless-devs/yaml#变量赋值
+      service: ${vars.service}
+      function:
+        name: 'embedding-model-download'
+        description: 'download model to nas'
+        codeUri: './embedding-service/source-code/download-model2nas'
+        runtime: nodejs16
+        timeout: 600
+        memorySize: 3072
+        cpu: 2.0
+        diskSize: 512
+        instanceConcurrency: 1
+        handler: index.handler
+        environmentVariables:
+          region: ${vars.region}
+  embedding-service:
+    component: fc
+    actions:
+      post-deploy: # 在deploy之前运行
+        - component: fc nas upload -r ./code/model-repo '/mnt/auto/embedding'
+          path: ./  
+        - component: fc invoke --service-name ${embedding-fc-model-download.output.service.name}
+            --function-name embedding-model-download
+    props:
+      region: ${vars.region}
+      service: ${vars.service}
+      function:
+        handler: index.handler
+        description: embedding service
+        timeout: 7200
+        caPort: 8000
+        layers:
+          - acs:fc:{{region}}:1431999136518149:layers/FastAPI-Python310/versions/1
+          - acs:fc:{{region}}:1431999136518149:layers/NLP-Python310/versions/1
+        customRuntimeConfig:
+          command:
+            - python3
+            - '-u'
+            - app/main.py
+        instanceType: c1
+        runtime: custom.debian10
+        instanceConcurrency: 10
+        cpu: 8
+        memorySize: 32768
+        diskSize: 10240
+        environmentVariables:
+          PATH: >-
+            /var/fc/lang/python3.10/bin::/usr/local/bin/apache-maven/bin:/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ruby/bin:/opt/bin:/code:/code/bin
+          PYTHONPATH: /opt/python:/code
+          MODEL_PATH: '/mnt/auto/embedding/text2vec-large-chinese'
+        name: 'embedding-function'
+        asyncConfiguration: {}
+        codeUri: './embedding-service/source-code/embedding'
+      triggers:
+        - name: httpTrigger
+          description: ''
+          type: http
+          config:
+            methods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - HEAD
+              - OPTIONS
+            authType: anonymous
+            disableURLInternet: false
+      customDomains:
+        - domainName: auto
+          protocol: HTTP
+          routeConfigs:
+            - path: /*
+  pgvector_llm-pgvector_llm:
+    component: fc
+    props:
+      region: ${vars.region}
+      service: ${vars.service}
+      function:
+        handler: index.handler
+        timeout: 120
+        diskSize: 512
+        caPort: 5001
+        instanceType: c1
+        runtime: custom-container
+        cpu: 4
+        customContainerConfig:
+          args: ''
+          accelerationType: Default
+          image: registry.${vars.region}.aliyuncs.com/pgvector_llm/pgvector_llm:0.0.5
+          command: ''
+          webServerMode: true
+        instanceConcurrency: 10
+        initializer: 'true'
+        initializationTimeout: 10
+        memorySize: 4096
+        environmentVariables:
+          CHATGLM_EMBEDDING_URL: ${embedding-service.output.url.custom_domain[0].domain}
+          CHATGLM_BASE_URL: ${chatglm6b-server.output.url.custom_domain[0].domain}
+          PGVECTOR_API_URL: http://120.26.105.194:5002
+        name: pgvector_llm
+        asyncConfiguration: {}
+      triggers:
+        - name: defaultTrigger
+          description: ''
+          type: http
+          qualifier: LATEST
+          config:
+            methods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+            authType: anonymous
+            disableURLInternet: false
+      customDomains:
+        - domainName: auto
+          protocol: HTTP
+          routeConfigs:
+            - path: /*
+  {{/if}}
