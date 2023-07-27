@@ -38,10 +38,10 @@ Parameters:
     llmModel:
       title: 大语言模型
       type: string
-      default: model-chatglm2-6b-int4
+      default: chatglm2-6b-int4
       description: 选择基础的大语言模型
       enum:
-        - model-chatglm2-6b-int4
+        - chatglm2-6b-int4
         - model-chatglm2-6b
     serviceName:
       title: 服务名

@@ -148,7 +148,7 @@ app.get('/modelReady', async (req, res) => {
   const checkHash = req.query.checkHash;
   let modelReady = true;
 
-  if(process.env.LLM_MODEL === 'model-chatglm2-6b-int4') {
+  if(process.env.LLM_MODEL === 'chatglm2-6b-int4') {
     res.send(modelReady);
     return;
   }
