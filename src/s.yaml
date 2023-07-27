@@ -22,6 +22,13 @@ services:
       pre-deploy: 
         - run: npm i 
           path: ./code/source-code/download-model2nas
+      {{ if llmModel !== 'chatglm2-6b-int4' ||  appName !== 'chatglm2-6b-webui'  }} 
+      post-deploy: 
+        - component: fc invoke --service-name ${fc-model-download.output.service.name}  --function-name model-download 
+        - component: fc nas upload -r ./code/${vars.APP_NAME} /mnt/auto/llm/${vars.APP_NAME}
+          path: ./ 
+        - component: fc nas upload -r ./code/${vars.LLM_MODEL} /mnt/auto/llm/${vars.LLM_MODEL}  # chatglm2-6b-int4 | chatglm2-6b
+      {{/if}}
     props:
       region: ${vars.region} # 关于变量的使用方法，可以参考：https://www.serverless-devs.com/serverless-devs/yaml#变量赋值
       service: ${vars.service}
@@ -45,14 +52,6 @@ services:
   
   chatglm6b-server:  #容器服务
     component: fc
-    {{ if llmModel !== 'chatglm2-6b-int4' ||  appName !== 'chatglm2-6b-webui'  }} 
-    actions:
-      post-deploy: 
-        - component: fc invoke --service-name ${fc-model-download.output.service.name}  --function-name model-download 
-        - component: fc nas upload -r ./code/${vars.APP_NAME} /mnt/auto/llm/${vars.APP_NAME}
-          path: ./ 
-        - component: fc nas upload -r ./code/${vars.LLM_MODEL} /mnt/auto/llm/${vars.LLM_MODEL}  # chatglm2-6b-int4 | chatglm2-6b
-    {{/if}}
     props:
       region: ${vars.region}
       service: ${vars.service}
@@ -161,14 +160,14 @@ services:
     actions:
       pre-deploy:
         - run: npm i
-          path: ./embedding-service/source-code/download-model2nas
+          path: ./code/embedding-service/source-code/download-model2nas
     props:
       region: ${vars.region} # 关于变量的使用方法，可以参考：https://www.serverless-devs.com/serverless-devs/yaml#变量赋值
       service: ${vars.service}
       function:
         name: 'embedding-model-download'
         description: 'download model to nas'
-        codeUri: './embedding-service/source-code/download-model2nas'
+        codeUri: './code/embedding-service/source-code/download-model2nas'
         runtime: nodejs16
         timeout: 600
         memorySize: 3072
@@ -182,7 +181,7 @@ services:
     component: fc
     actions:
       post-deploy: # 在deploy之前运行
-        - component: fc nas upload -r ./code/model-repo '/mnt/auto/embedding'
+        - component: fc nas upload -r ./code/embedding-service/model-repo '/mnt/auto/embedding'
           path: ./  
         - component: fc invoke --service-name ${embedding-fc-model-download.output.service.name}
             --function-name embedding-model-download
@@ -215,7 +214,7 @@ services:
           MODEL_PATH: '/mnt/auto/embedding/text2vec-large-chinese'
         name: 'embedding-function'
         asyncConfiguration: {}
-        codeUri: './embedding-service/source-code/embedding'
+        codeUri: './code/embedding-service/source-code/embedding'
       triggers:
         - name: httpTrigger
           description: ''
