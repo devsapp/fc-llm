@@ -8,14 +8,14 @@ vars:
   service:
     name: '{{ serviceName }}'
     description: '将开源模型部署到函数计算'
-    {{ if llmModel !== 'chatglm2-6b-int4' &&  appName !== 'chatglm2-6b'  }} 
+    {{ if llmModel !== 'chatglm2-6b-int4' ||  appName !== 'chatglm2-6b'  }} 
     nasConfig: auto
     logConfig: auto
     vpcConfig: auto
     {{/if}}
     internetAccess: true
 services:
-  {{ if llmModel !== 'chatglm2-6b-int4' &&  appName !== 'chatglm2-6b'  }} 
+  {{ if llmModel !== 'chatglm2-6b-int4' ||  appName !== 'chatglm2-6b'  }} 
   fc-model-download:
     component: fc
     actions:
@@ -44,7 +44,7 @@ services:
 
   chatglm6b-server:  #容器服务
     component: fc
-    {{ if llmModel !== 'chatglm2-6b-int4' &&  appName !== 'chatglm2-6b'  }} 
+    {{ if llmModel !== 'chatglm2-6b-int4' ||  appName !== 'chatglm2-6b'  }} 
     actions:
       post-deploy: 
         - component: fc nas upload -r ./code/{{appName}} /mnt/auto/llm/{{appName}}
