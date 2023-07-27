@@ -79,7 +79,7 @@ services:
           {{ if llmModel !== 'chatglm2-6b-int4' ||  appName !== 'chatglm2-6b-webui'  }} 
           APP_NAME: ${vars.APP_NAME}
           {{/if}}
-          {{ if llmModel === 'chatglm2-6b-int4' &&  appName !== 'chatglm2-6b-webui'  }} 
+          {{ if llmModel === 'chatglm2-6b-int4' &&  appName === 'chatglm2-6b-webui'  }} 
           APP_NAME: chatglm2-6b
           {{/if}}
           WEB_SERVER: gradio
