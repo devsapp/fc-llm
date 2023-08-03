@@ -183,7 +183,7 @@ services:
       post-deploy: # 在deploy之前运行
         - component: fc nas upload -r ./code/embedding-service/model-repo '/mnt/auto/embedding'
           path: ./  
-        - component: fc invoke --service-name ${embedding-fc-model-download.output.service.name}
+        - component: fc invoke --service-name ${vars.service.name}
             --function-name embedding-model-download
     props:
       region: ${vars.region}
@@ -229,11 +229,11 @@ services:
               - OPTIONS
             authType: anonymous
             disableURLInternet: false
-      # customDomains:
-      #   - domainName: auto
-      #     protocol: HTTP
-      #     routeConfigs:
-      #       - path: /*
+      customDomains:
+        - domainName: auto
+          protocol: HTTP
+          routeConfigs:
+            - path: /*
   pgvector_llm-pgvector_llm:
     component: fc
     props:
