@@ -250,7 +250,7 @@ services:
         customContainerConfig:
           args: ''
           accelerationType: Default
-          image: registry.${vars.region}.aliyuncs.com/pgvector_llm/pgvector_llm:0.0.5
+          image: registry.${vars.region}.aliyuncs.com/pgvector_llm/pgvector_llm:pgvector_llm:release-1.0.1
           command: ''
           webServerMode: true
         instanceConcurrency: 10
@@ -260,7 +260,6 @@ services:
         environmentVariables:
           CHATGLM_EMBEDDING_URL: ${embedding-service.output.url.custom_domain[0].domain}
           CHATGLM_BASE_URL: ${chatglm6b-server.output.url.custom_domain[0].domain}
-          PGVECTOR_API_URL: 
         name: pgvector_llm
         asyncConfiguration: {}
       triggers:
