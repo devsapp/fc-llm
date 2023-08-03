@@ -104,56 +104,56 @@ services:
           routeConfigs:
             - path: /*
 
-  chatglm-portal:
-    component: fc
-    actions:
-       pre-deploy:
-        - run: npm i
-          path: ./code/portal-code
-    props:
-      region: ${vars.region}
-      service: ${vars.service}
-      function:
-        name: chatglm-portal
-        description: Native recording handler
-        timeout: 3000
-        layers:
-          - acs:fc:cn-hangzhou:official:layers/Nodejs18/versions/1
-        instanceType: c1
-        runtime: custom.debian10
-        instanceConcurrency: 5
-        memorySize: 3072
-        cpu: 2.0
-        diskSize: 512
-        environmentVariables:
-          NODE_PATH: /opt/nodejs/node_modules
-          PATH: >-
-            /opt/nodejs18/bin::/usr/local/bin/apache-maven/bin:/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ruby/bin:/opt/bin:/code:/code/bin
-          chatServerUrl: '${chatglm6b-server.output.url.custom_domain[0].domain}'
-          adminUrl: ${fc-nas-admin2.output.url.custom_domain[0].domain}
-          LLM_MODEL: ${vars.LLM_MODEL}
-          APP_NAME: ${vars.APP_NAME}
-        codeUri: ./code/portal-code
-        caPort: 
-      triggers:
-        - name: defaultTrigger
-          type: http
-          config:
-            authType: anonymous
-            methods:
-              - GET
-              - POST
-              - PUT
-              - DELETE
-              - HEAD
-              - OPTIONS
-      customDomains:
-        - domainName: auto
-          protocol: HTTP
-          routeConfigs:
-            - path: /*
-              serviceName: ${vars.service.name}
-              functionName:  chatglm-portal
+  # chatglm-portal:
+  #   component: fc
+  #   actions:
+  #      pre-deploy:
+  #       - run: npm i
+  #         path: ./code/portal-code
+  #   props:
+  #     region: ${vars.region}
+  #     service: ${vars.service}
+  #     function:
+  #       name: chatglm-portal
+  #       description: Native recording handler
+  #       timeout: 3000
+  #       layers:
+  #         - acs:fc:cn-hangzhou:official:layers/Nodejs18/versions/1
+  #       instanceType: c1
+  #       runtime: custom.debian10
+  #       instanceConcurrency: 5
+  #       memorySize: 3072
+  #       cpu: 2.0
+  #       diskSize: 512
+  #       environmentVariables:
+  #         NODE_PATH: /opt/nodejs/node_modules
+  #         PATH: >-
+  #           /opt/nodejs18/bin::/usr/local/bin/apache-maven/bin:/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ruby/bin:/opt/bin:/code:/code/bin
+  #         chatServerUrl: '${chatglm6b-server.output.url.custom_domain[0].domain}'
+  #         adminUrl: ${fc-nas-admin2.output.url.custom_domain[0].domain}
+  #         LLM_MODEL: ${vars.LLM_MODEL}
+  #         APP_NAME: ${vars.APP_NAME}
+  #       codeUri: ./code/portal-code
+  #       caPort: 
+  #     triggers:
+  #       - name: defaultTrigger
+  #         type: http
+  #         config:
+  #           authType: anonymous
+  #           methods:
+  #             - GET
+  #             - POST
+  #             - PUT
+  #             - DELETE
+  #             - HEAD
+  #             - OPTIONS
+  #     customDomains:
+  #       - domainName: auto
+  #         protocol: HTTP
+  #         routeConfigs:
+  #           - path: /*
+  #             serviceName: ${vars.service.name}
+  #             functionName:  chatglm-portal
   {{ if appName == 'pg-chatglm2-6b-webui'  }} 
   embedding-fc-model-download:
     component: fc
