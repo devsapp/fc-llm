@@ -29,8 +29,8 @@ Parameters:
     appName:
       title: 应用
       type: string
-      default: chatglm2-6b-webui
-      description: 大语言模型的应用
+      default: pg-chatglm2-6b-webui
+      description: 大语言模型的应用, pg-chatglm2-6b-webui(带向量数据库的私有知识问答应用);chatglm2-6b-webui(带webui的大语言模型聊天应用);chatglm2-6b-api(chatglm2-6b的api服务)
       enum:
         - pg-chatglm2-6b-webui
         - chatglm2-6b-webui
@@ -39,10 +39,10 @@ Parameters:
       title: 大语言模型
       type: string
       default: chatglm2-6b-int4
-      description: 选择基础的大语言模型
+      description: 选择基础的大语言模型 chatglm2-6b-int4(int4 量化的 chatglm2-6b模型，不会消耗您的nas资源)
       enum:
         - chatglm2-6b-int4
-        - chatglm2-6b
+        # - chatglm2-6b
     serviceName:
       title: 服务名
       type: string
