@@ -98,11 +98,11 @@ services:
               - DELETE
             authType: anonymous
             disableURLInternet: false
-      customDomains:
-        - domainName: auto
-          protocol: HTTP
-          routeConfigs:
-            - path: /*
+      # customDomains:
+      #   - domainName: auto
+      #     protocol: HTTP
+      #     routeConfigs:
+      #       - path: /*
 
   # chatglm-portal:
   #   component: fc
@@ -229,11 +229,11 @@ services:
               - OPTIONS
             authType: anonymous
             disableURLInternet: false
-      customDomains:
-        - domainName: auto
-          protocol: HTTP
-          routeConfigs:
-            - path: /*
+      # customDomains:
+      #   - domainName: auto
+      #     protocol: HTTP
+      #     routeConfigs:
+      #       - path: /*
   pgvector_llm-pgvector_llm:
     component: fc
     props:
@@ -258,8 +258,8 @@ services:
         initializationTimeout: 10
         memorySize: 4096
         environmentVariables:
-          CHATGLM_EMBEDDING_URL: ${embedding-service.output.url.custom_domain[0].domain}
-          CHATGLM_BASE_URL: ${chatglm6b-server.output.url.custom_domain[0].domain}
+          CHATGLM_EMBEDDING_URL: ${embedding-service.output.url.system_intranet_url}
+          CHATGLM_BASE_URL: ${chatglm6b-server.output.url.system_intranet_url}
         name: pgvector_llm
         asyncConfiguration: {}
       triggers:
