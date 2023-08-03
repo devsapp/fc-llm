@@ -16,7 +16,7 @@ vars:
     internetAccess: true
 services:
   {{ if llmModel !== 'chatglm2-6b-int4' ||  appName !== 'chatglm2-6b-webui'  }} 
-  fc-model-download:
+  llm-model-download:
     component: fc
     actions:
       pre-deploy: 
@@ -24,7 +24,7 @@ services:
           path: ./code/source-code/download-model2nas
       {{ if llmModel !== 'chatglm2-6b-int4' ||  appName !== 'chatglm2-6b-webui'  }} 
       post-deploy: 
-        - component: fc invoke --service-name ${vars.service.name}  --function-name model-download 
+        - component: fc invoke --service-name ${vars.service.name}  --function-name llm-model-download 
         - component: fc nas upload -r ./code/${vars.APP_NAME} /mnt/auto/llm/${vars.APP_NAME}
           path: ./ 
         - component: fc nas upload -r ./code/${vars.LLM_MODEL} /mnt/auto/llm/${vars.LLM_MODEL}  # chatglm2-6b-int4 | chatglm2-6b
@@ -33,7 +33,7 @@ services:
       region: ${vars.region} # 关于变量的使用方法，可以参考：https://www.serverless-devs.com/serverless-devs/yaml#变量赋值
       service: ${vars.service}
       function:
-        name: "model-download"
+        name: "llm-model-download"
         description: 'download model to nas'
         codeUri: './code/source-code/download-model2nas'
         runtime: nodejs16
@@ -125,6 +125,8 @@ services:
   #       memorySize: 3072
   #       cpu: 2.0
   #       diskSize: 512
+
+  
   #       environmentVariables:
   #         NODE_PATH: /opt/nodejs/node_modules
   #         PATH: >-
@@ -155,12 +157,14 @@ services:
   #             serviceName: ${vars.service.name}
   #             functionName:  chatglm-portal
   {{ if appName == 'pg-chatglm2-6b-webui'  }} 
-  embedding-fc-model-download:
+  embedding-model-download:
     component: fc
     actions:
       pre-deploy:
         - run: npm i
           path: ./code/embedding-service/source-code/download-model2nas
+      post-deploy:
+        - component: fc invoke --service-name ${vars.service.name}  --function-name embedding-model-download
     props:
       region: ${vars.region} # 关于变量的使用方法，可以参考：https://www.serverless-devs.com/serverless-devs/yaml#变量赋值
       service: ${vars.service}
@@ -183,8 +187,6 @@ services:
       post-deploy: # 在deploy之前运行
         - component: fc nas upload -r ./code/embedding-service/model-repo '/mnt/auto/embedding'
           path: ./  
-        - component: fc invoke --service-name ${vars.service.name}
-            --function-name embedding-model-download
     props:
       region: ${vars.region}
       service: ${vars.service}
