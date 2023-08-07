@@ -10,7 +10,7 @@ vars:
     description: '将开源模型部署到函数计算'
     {{ if llmModel !== 'chatglm2-6b-int4' ||  appName !== 'chatglm2-6b-webui'  }} 
     nasConfig: auto
-    logConfig: auto
+    # logConfig: auto
     vpcConfig: auto
     {{/if}}
     internetAccess: true
