@@ -170,10 +170,10 @@ services:
       service: ${vars.service}
       function:
         name: 'embedding-model-download'
-        description: 'download model to nas'
+        description: 'download embedding model to nas'
         codeUri: './code/embedding-service/source-code/download-model2nas'
         runtime: nodejs16
-        timeout: 600
+        timeout: 3000
         memorySize: 3072
         cpu: 2.0
         diskSize: 512
