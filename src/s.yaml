@@ -177,7 +177,7 @@ services:
         memorySize: 3072
         cpu: 2.0
         diskSize: 512
-        instanceConcurrency: 1
+        instanceConcurrency: 100
         handler: index.handler
         environmentVariables:
           region: ${vars.region}
@@ -205,7 +205,7 @@ services:
             - app/main.py
         instanceType: c1
         runtime: custom.debian10
-        instanceConcurrency: 10
+        instanceConcurrency: 100
         cpu: 8
         memorySize: 32768
         diskSize: 10240
