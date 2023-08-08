@@ -8,6 +8,7 @@ vars:
   service:
     name: '{{ serviceName }}'
     description: '将开源模型部署到函数计算'
+    {{ if roleArn !== '' && roleArn !== undefined }}role: "{{roleArn}}"{{/if}}
     {{ if llmModel !== 'chatglm2-6b-int4' ||  appName !== 'chatglm2-6b-webui'  }} 
     nasConfig: auto
     # logConfig: auto
@@ -255,9 +256,9 @@ services:
           image: registry.${vars.region}.aliyuncs.com/pgvector_llm/pgvector_llm:release-1.0.1
           command: ''
           webServerMode: true
-        instanceConcurrency: 10
+        instanceConcurrency: 100
         initializer: 'true'
-        initializationTimeout: 10
+        initializationTimeout: 100
         memorySize: 4096
         environmentVariables:
           CHATGLM_EMBEDDING_URL: ${embedding-service.output.url.system_intranet_url}
