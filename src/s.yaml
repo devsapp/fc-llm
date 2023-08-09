@@ -185,9 +185,10 @@ services:
   embedding-service:
     component: fc
     actions:
-      post-deploy: # 在deploy之前运行
+      post-deploy: 
         - component: fc nas upload -r ./code/embedding-service/model-repo '/mnt/auto/embedding'
           path: ./  
+        - component: 'fc invoke --service-name ${vars.service.name}  --function-name embedding-function --invocation-type async'
     props:
       region: ${vars.region}
       service: ${vars.service}
@@ -232,11 +233,11 @@ services:
               - OPTIONS
             authType: anonymous
             disableURLInternet: false
-      customDomains:
-        - domainName: auto
-          protocol: HTTP
-          routeConfigs:
-            - path: /*
+      # customDomains:
+      #   - domainName: auto
+      #     protocol: HTTP
+      #     routeConfigs:
+      #       - path: /*
   pgvector_llm-pgvector_llm:
     component: fc
     props:
@@ -247,13 +248,20 @@ services:
         timeout: 120
         diskSize: 512
         caPort: 5001
+        instanceLifecycleConfig:
+          preStop:
+            handler: 'true'
+            timeout: 10
+          preFreeze:
+            handler: ''
+            timeout: 3
         instanceType: c1
         runtime: custom-container
         cpu: 4
         customContainerConfig:
           args: ''
           accelerationType: Default
-          image: registry.${vars.region}.aliyuncs.com/pgvector_llm/pgvector_llm:release-1.0.1
+          image: registry.${vars.region}.aliyuncs.com/pgvector_llm/pgvector_llm:release-1.0.3
           command: ''
           webServerMode: true
         instanceConcurrency: 100
