@@ -53,6 +53,9 @@ services:
   
   chatglm6b-server:  #容器服务
     component: fc
+    actions:
+      post-deploy: 
+        - component: 'fc invoke --service-name ${vars.service.name}  --function-name chatglm --invocation-type async'
     props:
       region: ${vars.region}
       service: ${vars.service}
@@ -234,11 +237,11 @@ services:
               - OPTIONS
             authType: anonymous
             disableURLInternet: false
-      customDomains:
-        - domainName: auto
-          protocol: HTTP
-          routeConfigs:
-            - path: /*
+      # customDomains:
+      #   - domainName: auto
+      #     protocol: HTTP
+      #     routeConfigs:
+      #       - path: /*
   pgvector_llm-pgvector_llm:
     component: fc
     props:
