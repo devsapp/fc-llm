@@ -234,11 +234,11 @@ services:
               - OPTIONS
             authType: anonymous
             disableURLInternet: false
-      # customDomains:
-      #   - domainName: auto
-      #     protocol: HTTP
-      #     routeConfigs:
-      #       - path: /*
+      customDomains:
+        - domainName: auto
+          protocol: HTTP
+          routeConfigs:
+            - path: /*
   pgvector_llm-pgvector_llm:
     component: fc
     props:
