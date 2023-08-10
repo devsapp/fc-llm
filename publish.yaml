@@ -35,13 +35,15 @@ Parameters:
         - pg-chatglm2-6b-webui
         - chatglm2-6b-webui
         - chatglm2-6b-api
+        - llama2-api
     llmModel:
       title: 大语言模型
       type: string
       default: chatglm2-6b-int4
-      description: 选择基础的大语言模型 chatglm2-6b-int4(int4 量化的 chatglm2-6b模型，不会消耗您的nas资源)
+      description: 选择基础的大语言模型 chatglm2-6b-int4(int4 量化的 chatglm2-6b模型，不会消耗您的nas资源); llama2-7b-q2k(llama2-7b 量化之后的模型，不会消耗您的nas资源)
       enum:
         - chatglm2-6b-int4
+        # - llama2-7b-q2k
         # - chatglm2-6b
     serviceName:
       title: 服务名
