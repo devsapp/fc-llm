@@ -26,11 +26,16 @@ exports.handler = async (_event, _context, callback) => {
     if (fs.existsSync(modelFile)) {
         callback(null, 'fiExist');
     } else {
-        await downloads(fileUrl, {
-            dest: modelDir,
-            filename,
-            extract: true
-        });
-        callback(null, 'download success');
+        try {
+            await downloads(fileUrl, {
+                dest: modelDir,
+                filename,
+                extract: true
+            });
+            callback(null, 'download success');
+        } catch (e) {
+            callback(null, e);
+        }
+
     }
 }
