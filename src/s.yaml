@@ -265,7 +265,7 @@ services:
         customContainerConfig:
           args: ''
           accelerationType: Default
-          image: registry.${vars.region}.aliyuncs.com/pgvector_llm/pgvector_llm:0.0.8
+          image: registry.${vars.region}.aliyuncs.com/pgvector_llm/pgvector_llm:0.0.9
           command: ''
           webServerMode: true
         instanceConcurrency: 100
