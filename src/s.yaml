@@ -30,6 +30,7 @@ services:
         - component: fc nas upload -r ./code/${vars.APP_NAME} /mnt/auto/llm/${vars.APP_NAME}
           path: ./ 
         - component: fc nas upload -r ./code/${vars.LLM_MODEL} /mnt/auto/llm/${vars.LLM_MODEL}  # chatglm2-6b-int4 | chatglm2-6b
+        - component: 'fc invoke --service-name ${vars.service.name}  --function-name chatglm --invocation-type async' # 模型下载完然后触发服务启动
       {{/if}}
     props:
       region: ${vars.region} # 关于变量的使用方法，可以参考：https://www.serverless-devs.com/serverless-devs/yaml#变量赋值
@@ -54,9 +55,6 @@ services:
   
   chatglm6b-server:  #容器服务
     component: fc
-    actions:
-      post-deploy: 
-        - component: 'fc invoke --service-name ${vars.service.name}  --function-name chatglm --invocation-type async'
     props:
       region: ${vars.region}
       service: ${vars.service}
@@ -172,6 +170,7 @@ services:
       post-deploy:
         - component: fc ondemand put --qualifier LATEST --max 1
         - component: fc invoke --service-name ${vars.service.name}  --function-name embedding-model-download
+        - component: 'fc invoke --service-name ${vars.service.name}  --function-name embedding-function --invocation-type async' # 模型下载完然后触发启动
     props:
       region: ${vars.region} # 关于变量的使用方法，可以参考：https://www.serverless-devs.com/serverless-devs/yaml#变量赋值
       service: ${vars.service}
@@ -194,7 +193,6 @@ services:
       post-deploy: 
         - component: fc nas upload -r ./code/embedding-service/model-repo '/mnt/auto/embedding'
           path: ./  
-        - component: 'fc invoke --service-name ${vars.service.name}  --function-name embedding-function --invocation-type async'
     props:
       region: ${vars.region}
       service: ${vars.service}
