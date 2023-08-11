@@ -101,12 +101,17 @@ services:
               - DELETE
             authType: anonymous
             disableURLInternet: false
-      # {{ if appName !== 'pg-chatglm2-6b-webui'  }} 
       customDomains:
         - domainName: auto
           protocol: HTTP
           routeConfigs:
             - path: /*
+      # {{ if appName !== 'pg-chatglm2-6b-webui'  }} 
+      # customDomains:
+      #   - domainName: auto
+      #     protocol: HTTP
+      #     routeConfigs:
+      #       - path: /*
       # {{/if}}
   # chatglm-portal:
   #   component: fc
