@@ -3,7 +3,7 @@ Type: Application
 Name: fc-llm
 Provider:
   - 阿里云
-Version: 0.0.3
+Version: 0.0.4
 Description: 部署大模型及相关应用到函数计算
 HomePage: 项目首页地址
 Tags: #标签详情
@@ -35,7 +35,7 @@ Parameters:
         - pg-chatglm2-6b-webui
         - chatglm2-6b-webui
         - chatglm2-6b-api
-        - llama2-api
+        # - llama2-api
     llmModel:
       title: 大语言模型
       type: string
