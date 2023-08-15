@@ -3,7 +3,7 @@ Type: Application
 Name: fc-llm
 Provider:
   - 阿里云
-Version: 0.0.5
+Version: 0.0.6
 Description: 部署大语言模型和向量数据库的相关应用到函数计算，向量计算与存储由RDS PostgreSQL提供支持
 HomePage: 项目首页地址
 Tags: #标签详情
@@ -30,17 +30,17 @@ Parameters:
       title: 应用
       type: string
       default: pg-chatglm2-6b-webui
-      description: 大语言模型的应用, pg-chatglm2-6b-webui(带向量数据库的私有知识问答应用);chatglm2-6b-webui(带webui的大语言模型聊天应用);chatglm2-6b-api(chatglm2-6b的api服务)
+      description: 大语言模型的应用, pg-chatglm2-6b-webui【带向量数据库的私有知识问答应用】; chatglm2-6b-webui【大语言模型聊天应用，不包私有知识库能力】;
       enum:
         - pg-chatglm2-6b-webui
         - chatglm2-6b-webui
-        - chatglm2-6b-api
+        # - chatglm2-6b-api
         # - llama2-api
     llmModel:
       title: 大语言模型
       type: string
       default: chatglm2-6b-int4
-      description: 选择基础的大语言模型 chatglm2-6b-int4(int4 量化的 chatglm2-6b模型，不会消耗您的nas资源); llama2-7b-q2k(llama2-7b 量化之后的模型，不会消耗您的nas资源)
+      description: 选择基础的大语言模型 chatglm2-6b-int4(int4 量化的 chatglm2-6b模型，如果您选择了chatglm2-6b-webui应用，该模型服务不会消耗您的nas资源);
       enum:
         - chatglm2-6b-int4
         # - llama2-7b-q2k
