@@ -1,13 +1,14 @@
-from typing import List, Dict, Any
-from pydantic import BaseModel
+from typing import List, Union, Dict, Any
+from pydantic import BaseModel, Field
 
 
 class EmbeddingRequest(BaseModel):
-    sentences: List[str]
+    sentences: Union[str, List[str]]=Field(alias="input")
 
 
 class EmbeddingResponse(BaseModel):
-    embeddings: List[List[float]]
+    data: List[Dict[str, Any]]
+    object:str
 
 
 class SimilarityResponse(BaseModel):

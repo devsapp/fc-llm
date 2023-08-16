@@ -5,17 +5,15 @@ from schema import EmbeddingRequest, EmbeddingResponse, SimilarityResponse
 import service
 app = FastAPI()
 
+@app.get("/", include_in_schema=False)
+async def redirect_to_docs():
+    response = RedirectResponse(url='/docs')
+    return response
 
-@app.get("/")
-def index():
-    return RedirectResponse(url="/docs")
-
-
-@app.post("/embedding", response_model=EmbeddingResponse)
+@app.post("/encode", response_model=EmbeddingResponse)
 async def encode(request: EmbeddingRequest):
     return {
-        "object": "list",
-        "data": service.encode(request.sentences)
+        "embeddings": service.encode(request.sentences).tolist()
     }
 
 

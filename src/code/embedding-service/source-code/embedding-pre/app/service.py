@@ -1,17 +1,22 @@
 import os
 from sentence_transformers import SentenceTransformer, util
 
-model: SentenceTransformer = SentenceTransformer(os.environ.get('MODEL_PATH'))
+model: SentenceTransformer = None
 
 
-def encode(sentences: str | list[str]):
-    if isinstance(sentences, str):
-        sentences = [sentences]
-    data = model.encode(sentences).tolist()
-    return [{"object": "embedding", "embedding": e, "index": i} for i, e in enumerate(data)]
+def init():
+    global model
+    if not model:
+        model = SentenceTransformer(os.environ.get('MODEL_PATH'))
+
+
+def encode(sentences: list[str]):
+    init()
+    return model.encode(sentences)
 
 
 def compute_similarity(sentences: list[str]):
+    init()
     embeddings = model.encode(sentences, convert_to_tensor=True)
     scores = util.cos_sim(embeddings, embeddings)
     resp = []

@@ -4,7 +4,7 @@ vars:
   region: '{{ region }}'
   LLM_MODEL: '{{ llmModel }}' # 基础模型及配置路径
   APP_NAME: '{{ appName }}'   # chatglm2-6b、app-chatglm2-6b-langchain、app-chatglm2-6b-api
-
+  EMBEDDING_MODLE_NAME: 'bge-large-zh' #text2vec-large-chinese
   service:
     name: '{{ serviceName }}'
     description: '将开源模型部署到函数计算'
@@ -16,41 +16,41 @@ vars:
     {{/if}}
     internetAccess: true
 services:
-  {{ if llmModel !== 'chatglm2-6b-int4' ||  appName !== 'chatglm2-6b-webui'  }} 
-  llm-model-download:
-    component: fc
-    actions:
-      pre-deploy: 
-        - run: npm i 
-          path: ./code/source-code/download-model2nas
-      {{ if llmModel !== 'chatglm2-6b-int4' ||  appName !== 'chatglm2-6b-webui'  }} 
-      post-deploy: 
-        - component: fc ondemand put --qualifier LATEST --max 1
-        - component: fc invoke --service-name ${vars.service.name}  --function-name llm-model-download 
-        - component: fc nas upload -r ./code/${vars.APP_NAME} /mnt/auto/llm/${vars.APP_NAME}
-          path: ./ 
-        - component: fc nas upload -r ./code/${vars.LLM_MODEL} /mnt/auto/llm/${vars.LLM_MODEL}  # chatglm2-6b-int4 | chatglm2-6b
-        - component: 'fc invoke --service-name ${vars.service.name}  --function-name chatglm --invocation-type async' # 模型下载完然后触发服务启动
-      {{/if}}
-    props:
-      region: ${vars.region} # 关于变量的使用方法，可以参考：https://www.serverless-devs.com/serverless-devs/yaml#变量赋值
-      service: ${vars.service}
-      function:
-        name: "llm-model-download"
-        description: 'download model to nas'
-        codeUri: './code/source-code/download-model2nas'
-        runtime: nodejs16
-        timeout: 600
-        memorySize: 3072
-        cpu: 2.0
-        diskSize: 512
-        instanceConcurrency: 100
-        handler: index.handler
-        environmentVariables:
-          modelPath: ${vars.LLM_MODEL}
-          appPath: ${vars.APP_NAME}
-          region: ${vars.region}
-  {{/if}}
+  # {{ if llmModel !== 'chatglm2-6b-int4' ||  appName !== 'chatglm2-6b-webui'  }} 
+  # llm-model-download:
+  #   component: fc
+  #   actions:
+  #     pre-deploy: 
+  #       - run: npm i 
+  #         path: ./code/source-code/download-model2nas
+  #     {{ if llmModel !== 'chatglm2-6b-int4' ||  appName !== 'chatglm2-6b-webui'  }} 
+  #     post-deploy: 
+  #       - component: fc ondemand put --qualifier LATEST --max 1
+  #       - component: fc invoke --service-name ${vars.service.name}  --function-name llm-model-download 
+  #       - component: fc nas upload -r ./code/${vars.APP_NAME} /mnt/auto/llm/${vars.APP_NAME}
+  #         path: ./ 
+  #       - component: fc nas upload -r ./code/${vars.LLM_MODEL} /mnt/auto/llm/${vars.LLM_MODEL}  # chatglm2-6b-int4 | chatglm2-6b
+  #       - component: 'fc invoke --service-name ${vars.service.name}  --function-name chatglm --invocation-type async' # 模型下载完然后触发服务启动
+  #     {{/if}}
+  #   props:
+  #     region: ${vars.region} # 关于变量的使用方法，可以参考：https://www.serverless-devs.com/serverless-devs/yaml#变量赋值
+  #     service: ${vars.service}
+  #     function:
+  #       name: "llm-model-download"
+  #       description: 'download model to nas'
+  #       codeUri: './code/source-code/download-model2nas'
+  #       runtime: nodejs16
+  #       timeout: 600
+  #       memorySize: 3072
+  #       cpu: 2.0
+  #       diskSize: 512
+  #       instanceConcurrency: 100
+  #       handler: index.handler
+  #       environmentVariables:
+  #         modelPath: ${vars.LLM_MODEL}
+  #         appPath: ${vars.APP_NAME}
+  #         region: ${vars.region}
+  # {{/if}}
   
   
   chatglm6b-server:  #容器服务
@@ -78,13 +78,16 @@ services:
         memorySize: 32768
         environmentVariables:
           LLM_MODEL: ${vars.LLM_MODEL}
-          {{ if llmModel !== 'chatglm2-6b-int4' ||  appName !== 'chatglm2-6b-webui'  }} 
-          APP_NAME: ${vars.APP_NAME}
-          {{/if}}
-          {{ if llmModel === 'chatglm2-6b-int4' &&  appName === 'chatglm2-6b-webui'  }} 
           APP_NAME: chatglm2-6b
-          {{/if}}
-          WEB_SERVER: gradio
+          WEB_SERVER: api
+          # LLM_MODEL: ${vars.LLM_MODEL}
+          # {{ if llmModel !== 'chatglm2-6b-int4' ||  appName !== 'chatglm2-6b-webui'  }} 
+          # APP_NAME: ${vars.APP_NAME}
+          # {{/if}}
+          # {{ if llmModel === 'chatglm2-6b-int4' &&  appName === 'chatglm2-6b-webui'  }} 
+          # APP_NAME: chatglm2-6b
+          # {{/if}}
+          # WEB_SERVER: gradio
         gpuMemorySize: 16384
         name: chatglm
         asyncConfiguration: {}
@@ -101,13 +104,18 @@ services:
               - DELETE
             authType: anonymous
             disableURLInternet: false
-      {{ if appName !== 'pg-chatglm2-6b-webui'  }} 
       customDomains:
         - domainName: auto
           protocol: HTTP
           routeConfigs:
             - path: /*
-      {{/if}}
+      # {{ if appName !== 'pg-chatglm2-6b-webui'  }} 
+      # customDomains:
+      #   - domainName: auto
+      #     protocol: HTTP
+      #     routeConfigs:
+      #       - path: /*
+      # {{/if}}
   # chatglm-portal:
   #   component: fc
   #   actions:
@@ -187,6 +195,7 @@ services:
         handler: index.handler
         environmentVariables:
           region: ${vars.region}
+          EMBEDDING_MODEL_NAME: ${vars.EMBEDDING_MODLE_NAME}
   embedding-service:
     component: fc
     actions:
@@ -219,7 +228,7 @@ services:
           PATH: >-
             /var/fc/lang/python3.10/bin::/usr/local/bin/apache-maven/bin:/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ruby/bin:/opt/bin:/code:/code/bin
           PYTHONPATH: /opt/python:/code
-          MODEL_PATH: '/mnt/auto/embedding/text2vec-large-chinese'
+          MODEL_PATH: '/mnt/auto/embedding/${vars.EMBEDDING_MODLE_NAME}'
         name: 'embedding-function'
         asyncConfiguration: {}
         codeUri: './code/embedding-service/source-code/embedding'
@@ -237,11 +246,11 @@ services:
               - OPTIONS
             authType: anonymous
             disableURLInternet: false
-      # customDomains:
-      #   - domainName: auto
-      #     protocol: HTTP
-      #     routeConfigs:
-      #       - path: /*
+      customDomains:
+        - domainName: auto
+          protocol: HTTP
+          routeConfigs:
+            - path: /*
   pgvector_llm-pgvector_llm:
     component: fc
     props:
