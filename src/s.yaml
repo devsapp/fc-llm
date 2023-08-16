@@ -57,7 +57,11 @@ services:
     component: fc
     props:
       region: ${vars.region}
-      service: ${vars.service}
+      service: 
+        name: "llm-server"
+        description: '将开源模型部署到函数计算'
+        {{ if roleArn !== '' && roleArn !== undefined }}role: "{{roleArn}}"{{/if}}
+        internetAccess: true
       function:
         handler: index.handler
         timeout: 600
@@ -79,7 +83,12 @@ services:
         environmentVariables:
           LLM_MODEL: ${vars.LLM_MODEL}
           APP_NAME: chatglm2-6b
+          {{ if appName === 'pg-chatglm2-6b-webui'  }} 
           WEB_SERVER: api
+          {{/if}}
+          {{ if appName === 'chatglm2-6b-webui'  }} 
+          WEB_SERVER: gradio
+          {{/if}}
           # LLM_MODEL: ${vars.LLM_MODEL}
           # {{ if llmModel !== 'chatglm2-6b-int4' ||  appName !== 'chatglm2-6b-webui'  }} 
           # APP_NAME: ${vars.APP_NAME}
