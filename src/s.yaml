@@ -16,52 +16,48 @@ vars:
     {{/if}}
     internetAccess: true
 services:
-  # {{ if llmModel !== 'chatglm2-6b-int4' ||  appName !== 'chatglm2-6b-webui'  }} 
-  # llm-model-download:
-  #   component: fc
-  #   actions:
-  #     pre-deploy: 
-  #       - run: npm i 
-  #         path: ./code/source-code/download-model2nas
-  #     {{ if llmModel !== 'chatglm2-6b-int4' ||  appName !== 'chatglm2-6b-webui'  }} 
-  #     post-deploy: 
-  #       - component: fc ondemand put --qualifier LATEST --max 1
-  #       - component: fc invoke --service-name ${vars.service.name}  --function-name llm-model-download 
-  #       - component: fc nas upload -r ./code/${vars.APP_NAME} /mnt/auto/llm/${vars.APP_NAME}
-  #         path: ./ 
-  #       - component: fc nas upload -r ./code/${vars.LLM_MODEL} /mnt/auto/llm/${vars.LLM_MODEL}  # chatglm2-6b-int4 | chatglm2-6b
-  #       - component: 'fc invoke --service-name ${vars.service.name}  --function-name chatglm --invocation-type async' # 模型下载完然后触发服务启动
-  #     {{/if}}
-  #   props:
-  #     region: ${vars.region} # 关于变量的使用方法，可以参考：https://www.serverless-devs.com/serverless-devs/yaml#变量赋值
-  #     service: ${vars.service}
-  #     function:
-  #       name: "llm-model-download"
-  #       description: 'download model to nas'
-  #       codeUri: './code/source-code/download-model2nas'
-  #       runtime: nodejs16
-  #       timeout: 600
-  #       memorySize: 3072
-  #       cpu: 2.0
-  #       diskSize: 512
-  #       instanceConcurrency: 100
-  #       handler: index.handler
-  #       environmentVariables:
-  #         modelPath: ${vars.LLM_MODEL}
-  #         appPath: ${vars.APP_NAME}
-  #         region: ${vars.region}
-  # {{/if}}
+  {{ if llmModel !== 'chatglm2-6b-int4' ||  appName !== 'chatglm2-6b-webui'  }} 
+  llm-model-download:
+    component: fc
+    actions:
+      pre-deploy: 
+        - run: npm i 
+          path: ./code/source-code/download-model2nas
+      {{ if llmModel !== 'chatglm2-6b-int4' ||  appName !== 'chatglm2-6b-webui'  }} 
+      post-deploy: 
+        - component: fc ondemand put --qualifier LATEST --max 1
+        - component: fc invoke --service-name ${vars.service.name}  --function-name llm-model-download 
+        - component: fc nas upload -r ./code/${vars.APP_NAME} /mnt/auto/llm/${vars.APP_NAME}
+          path: ./ 
+        - component: fc nas upload -r ./code/${vars.LLM_MODEL} /mnt/auto/llm/${vars.LLM_MODEL}  # chatglm2-6b-int4 | chatglm2-6b
+        - component: 'fc invoke --service-name ${vars.service.name}  --function-name chatglm --invocation-type async' # 模型下载完然后触发服务启动
+      {{/if}}
+    props:
+      region: ${vars.region} # 关于变量的使用方法，可以参考：https://www.serverless-devs.com/serverless-devs/yaml#变量赋值
+      service: ${vars.service}
+      function:
+        name: "llm-model-download"
+        description: 'download model to nas'
+        codeUri: './code/source-code/download-model2nas'
+        runtime: nodejs16
+        timeout: 600
+        memorySize: 3072
+        cpu: 2.0
+        diskSize: 512
+        instanceConcurrency: 100
+        handler: index.handler
+        environmentVariables:
+          modelPath: ${vars.LLM_MODEL}
+          appPath: ${vars.APP_NAME}
+          region: ${vars.region}
+  {{/if}}
   
   
   chatglm6b-server:  #容器服务
     component: fc
     props:
       region: ${vars.region}
-      service: 
-        name: "llm-server"
-        description: '将开源模型部署到函数计算'
-        {{ if roleArn !== '' && roleArn !== undefined }}role: "{{roleArn}}"{{/if}}
-        internetAccess: true
+      service: ${vars.service}
       function:
         handler: index.handler
         timeout: 600
@@ -82,21 +78,14 @@ services:
         memorySize: 32768
         environmentVariables:
           LLM_MODEL: ${vars.LLM_MODEL}
+          {{ if llmModel !== 'chatglm2-6b-int4' ||  appName !== 'chatglm2-6b-webui'  }} 
+          APP_NAME: ${vars.APP_NAME}
+          MAIN_FILE: app/main.py
+          {{/if}}
+          {{ if llmModel === 'chatglm2-6b-int4' &&  appName === 'chatglm2-6b-webui'  }} 
           APP_NAME: chatglm2-6b
-          {{ if appName === 'pg-chatglm2-6b-webui'  }} 
-          WEB_SERVER: api
           {{/if}}
-          {{ if appName === 'chatglm2-6b-webui'  }} 
           WEB_SERVER: gradio
-          {{/if}}
-          # LLM_MODEL: ${vars.LLM_MODEL}
-          # {{ if llmModel !== 'chatglm2-6b-int4' ||  appName !== 'chatglm2-6b-webui'  }} 
-          # APP_NAME: ${vars.APP_NAME}
-          # {{/if}}
-          # {{ if llmModel === 'chatglm2-6b-int4' &&  appName === 'chatglm2-6b-webui'  }} 
-          # APP_NAME: chatglm2-6b
-          # {{/if}}
-          # WEB_SERVER: gradio
         gpuMemorySize: 16384
         name: chatglm
         asyncConfiguration: {}
