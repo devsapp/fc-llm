@@ -80,7 +80,6 @@ services:
           LLM_MODEL: ${vars.LLM_MODEL}
           {{ if llmModel !== 'chatglm2-6b-int4' ||  appName !== 'chatglm2-6b-webui'  }} 
           APP_NAME: ${vars.APP_NAME}
-          MAIN_FILE: app/main.py
           {{/if}}
           {{ if llmModel === 'chatglm2-6b-int4' &&  appName === 'chatglm2-6b-webui'  }} 
           APP_NAME: chatglm2-6b
@@ -272,7 +271,7 @@ services:
         customContainerConfig:
           args: ''
           accelerationType: Default
-          image: registry.${vars.region}.aliyuncs.com/pgvector_llm/pgvector_llm:release-1.0.5
+          image: registry.${vars.region}.aliyuncs.com/pgvector_llm/pgvector_llm:release-1.0.6
           command: ''
           webServerMode: true
         instanceConcurrency: 100
