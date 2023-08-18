@@ -61,7 +61,7 @@ services:
       function:
         handler: index.handler
         timeout: 600
-        diskSize: 10240
+        diskSize: 512
         caPort: 7860
         instanceType: fc.gpu.tesla.1
         runtime: custom-container
@@ -220,7 +220,7 @@ services:
         instanceConcurrency: 100
         cpu: 8
         memorySize: 32768
-        diskSize: 10240
+        diskSize: 512
         environmentVariables:
           PATH: >-
             /var/fc/lang/python3.10/bin::/usr/local/bin/apache-maven/bin:/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ruby/bin:/opt/bin:/code:/code/bin
