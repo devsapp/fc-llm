@@ -16,7 +16,7 @@
 
 <description>
 
-部署大模型及相关应用到函数计算
+部署大语言模型和向量数据库的相关应用到函数计算，向量计算与存储由RDS PostgreSQL提供支持
 
 </description>
 
@@ -42,8 +42,9 @@
 
 | 服务 |  备注  |
 | --- |  --- |
-| 函数计算 FC |  对 AIGC 进行 CPU 推理计算 |
-| 文件存储 NAS |  存储 AIGC 的模型, 新用户请先领取免费试用资源包https://free.aliyun.com/?product=9657388&crowd=personal |
+| 函数计算 FC |  对 AIGC 进行 CPU/GPU 推理计算 |
+| 文件存储 NAS |  存储大语言模型以及Embedding服务所需要的模型, 新用户请先领取免费试用资源包https://free.aliyun.com/?product=9657388&crowd=personal |
+| RDS PostgreSQL数据库 |   提供OLTP和向量数据库服务, RDS新用户可领取免费试用https://free.aliyun.com/?searchKey=rds%20postgresql |
 
 </service>
 
@@ -55,7 +56,10 @@
 
 您还需要注意：   
 您还需要注意：  
-1.使用完整的chatglm2-6b模型需要依赖阿里云函数计算和阿里云文件存储 Nas，这两款产品都会产生资费，请关注您的资源包使用情况和费用情况 2.项目部署成功之后确保模型加载完毕（左上角选择框有模型显示）再开始推理 3.项目初始启动有大约 1 分钟的白屏时间，这是服务完全冷启动的状态，请耐心等待
+1.基于PostgreSQL数据库的AI知识库应用 包含embedding服务， 大模型对话服务，以及数据库向量服务，涉及函数计算，文件存储NAS，RDS postgresql数据库，函数计算和文件存储NAS会在项目被访问的时候产生相关费用， RDS posgresql 则是在消耗完30次免费体验后 需要您自己付费购买新的实例 
+
+2.项目部署会把embedding服务， 模型服务以及数据库服务等一起部署上去，需要花费5-10分钟的时间
+3.初始启动有大约 1 分钟的白屏时间，这是服务完全冷启动的状态，请耐心等待
 
 </remark>
 
@@ -64,7 +68,7 @@
 免责声明：   
 免责声明：
 
-1. 该项目的构建镜像及应用模板完全开源，由社区开发者贡献，阿里云仅提供了算力支持；
+1. 该项目的软件部分由开源社区贡献，阿里云仅提供了算力及存储支持；
 
 </disclaimers>
 
@@ -93,10 +97,11 @@
 
 使用该项目，您需要有开通以下服务：
 
-| 服务         | 备注 |
-| ------------ | ---- |
-| 函数计算 FC  |      |
-| 文件存储 NAS |      |
+| 服务 |  备注  |
+| --- |  --- |
+| 函数计算 FC |  对 AIGC 进行 CPU/GPU 推理计算 |
+| 文件存储 NAS |  存储大语言模型以及Embedding服务所需要的模型, 新用户请先领取免费试用资源包https://free.aliyun.com/?product=9657388&crowd=personal |
+| RDS PostgreSQL数据库 |  提供OLTP和向量数据库服务, RDS新用户可领取免费试用https://free.aliyun.com/?searchKey=rds%20postgresql |
 
 推荐您拥有以下的产品权限 / 策略：
 
@@ -104,7 +109,7 @@
 
 ### 应用详情
 
-使用阿里云函数计算部署开源大模型，目前支持chatglm2-6b 以及 chatglm2-6b-int4, 
+使用阿里云函数计算部署开源大模型应用
 
 ## 使用文档
 
