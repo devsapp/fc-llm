@@ -16,43 +16,6 @@ vars:
     {{/if}}
     internetAccess: true
 services:
-  {{ if llmModel !== 'chatglm2-6b-int4' ||  appName !== 'chatglm2-6b-webui'  }} 
-  llm-model-download:
-    component: fc
-    actions:
-      pre-deploy: 
-        - run: npm i 
-          path: ./code/source-code/download-model2nas
-      {{ if llmModel !== 'chatglm2-6b-int4' ||  appName !== 'chatglm2-6b-webui'  }} 
-      post-deploy: 
-        - component: fc ondemand put --qualifier LATEST --max 1
-        - component: fc invoke --service-name ${vars.service.name}  --function-name llm-model-download 
-        - component: fc nas upload -r ./code/${vars.APP_NAME} /mnt/auto/llm/${vars.APP_NAME}
-          path: ./ 
-        - component: fc nas upload -r ./code/${vars.LLM_MODEL} /mnt/auto/llm/${vars.LLM_MODEL}  # chatglm2-6b-int4 | chatglm2-6b
-        - component: 'fc invoke --service-name ${vars.service.name}  --function-name chatglm --invocation-type async' # 模型下载完然后触发服务启动
-      {{/if}}
-    props:
-      region: ${vars.region} # 关于变量的使用方法，可以参考：https://www.serverless-devs.com/serverless-devs/yaml#变量赋值
-      service: ${vars.service}
-      function:
-        name: "llm-model-download"
-        description: 'download model to nas'
-        codeUri: './code/source-code/download-model2nas'
-        runtime: nodejs16
-        timeout: 600
-        memorySize: 3072
-        cpu: 2.0
-        diskSize: 512
-        instanceConcurrency: 100
-        handler: index.handler
-        environmentVariables:
-          modelPath: ${vars.LLM_MODEL}
-          appPath: ${vars.APP_NAME}
-          region: ${vars.region}
-  {{/if}}
-  
-  
   chatglm6b-server:  #容器服务
     component: fc
     props:
@@ -101,6 +64,44 @@ services:
               - DELETE
             authType: anonymous
             disableURLInternet: false
+  {{ if llmModel !== 'chatglm2-6b-int4' ||  appName !== 'chatglm2-6b-webui'  }} 
+  llm-model-download:
+    component: fc
+    actions:
+      pre-deploy: 
+        - run: npm i 
+          path: ./code/source-code/download-model2nas
+      {{ if llmModel !== 'chatglm2-6b-int4' ||  appName !== 'chatglm2-6b-webui'  }} 
+      post-deploy: 
+        - component: fc ondemand put --qualifier LATEST --max 1
+        - component: fc invoke --service-name ${vars.service.name}  --function-name llm-model-download 
+        - component: fc nas upload -r ./code/${vars.APP_NAME} /mnt/auto/llm/${vars.APP_NAME}
+          path: ./ 
+        - component: fc nas upload -r ./code/${vars.LLM_MODEL} /mnt/auto/llm/${vars.LLM_MODEL}  # chatglm2-6b-int4 | chatglm2-6b
+        - component: 'fc invoke --service-name ${vars.service.name}  --function-name chatglm --invocation-type async' # 模型下载完然后触发服务启动
+      {{/if}}
+    props:
+      region: ${vars.region} # 关于变量的使用方法，可以参考：https://www.serverless-devs.com/serverless-devs/yaml#变量赋值
+      service: ${vars.service}
+      function:
+        name: "llm-model-download"
+        description: 'download model to nas'
+        codeUri: './code/source-code/download-model2nas'
+        runtime: nodejs16
+        timeout: 600
+        memorySize: 3072
+        cpu: 2.0
+        diskSize: 512
+        instanceConcurrency: 100
+        handler: index.handler
+        environmentVariables:
+          modelPath: ${vars.LLM_MODEL}
+          appPath: ${vars.APP_NAME}
+          region: ${vars.region}
+  {{/if}}
+  
+  
+  
       # customDomains:
       #   - domainName: auto
       #     protocol: HTTP
@@ -166,34 +167,7 @@ services:
   #             serviceName: ${vars.service.name}
   #             functionName:  chatglm-portal
   {{ if appName == 'pg-chatglm2-6b-webui'  }} 
-  embedding-model-download:
-    component: fc
-    actions:
-      pre-deploy:
-        - run: npm i
-          path: ./code/embedding-service/source-code/download-model2nas
-      post-deploy:
-        - component: fc ondemand put --qualifier LATEST --max 1
-        - component: fc invoke --service-name ${vars.service.name}  --function-name embedding-model-download
-        - component: 'fc invoke --service-name ${vars.service.name}  --function-name embedding-function --invocation-type async' # 模型下载完然后触发启动
-    props:
-      region: ${vars.region} # 关于变量的使用方法，可以参考：https://www.serverless-devs.com/serverless-devs/yaml#变量赋值
-      service: ${vars.service}
-      function:
-        name: 'embedding-model-download'
-        description: 'download embedding model to nas'
-        codeUri: './code/embedding-service/source-code/download-model2nas'
-        runtime: nodejs16
-        timeout: 3000
-        memorySize: 3072
-        cpu: 2.0
-        diskSize: 512
-        instanceConcurrency: 100
-        handler: index.handler
-        environmentVariables:
-          region: ${vars.region}
-          EMBEDDING_MODEL_NAME: ${vars.EMBEDDING_MODLE_NAME}
-  embedding-service:
+   embedding-service:
     component: fc
     actions:
       post-deploy: 
@@ -248,6 +222,33 @@ services:
       #     protocol: HTTP
       #     routeConfigs:
       #       - path: /*
+  embedding-model-download:
+    component: fc
+    actions:
+      pre-deploy:
+        - run: npm i
+          path: ./code/embedding-service/source-code/download-model2nas
+      post-deploy:
+        - component: fc ondemand put --qualifier LATEST --max 1
+        - component: fc invoke --service-name ${vars.service.name}  --function-name embedding-model-download
+        - component: 'fc invoke --service-name ${vars.service.name}  --function-name embedding-function --invocation-type async' # 模型下载完然后触发启动
+    props:
+      region: ${vars.region} # 关于变量的使用方法，可以参考：https://www.serverless-devs.com/serverless-devs/yaml#变量赋值
+      service: ${vars.service}
+      function:
+        name: 'embedding-model-download'
+        description: 'download embedding model to nas'
+        codeUri: './code/embedding-service/source-code/download-model2nas'
+        runtime: nodejs16
+        timeout: 3000
+        memorySize: 3072
+        cpu: 2.0
+        diskSize: 512
+        instanceConcurrency: 100
+        handler: index.handler
+        environmentVariables:
+          region: ${vars.region}
+          EMBEDDING_MODEL_NAME: ${vars.EMBEDDING_MODLE_NAME}
   pgvector_llm-pgvector_llm:
     component: fc
     props:
