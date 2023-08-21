@@ -167,7 +167,7 @@ services:
   #             serviceName: ${vars.service.name}
   #             functionName:  chatglm-portal
   {{ if appName == 'pg-chatglm2-6b-webui'  }} 
-   embedding-service:
+  embedding-service:
     component: fc
     actions:
       post-deploy: 
