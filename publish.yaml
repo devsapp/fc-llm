@@ -3,7 +3,7 @@ Type: Application
 Name: fc-llm
 Provider:
   - 阿里云
-Version: 0.0.8
+Version: 0.0.9
 Description: 部署大语言模型和向量数据库的相关应用到函数计算，向量计算与存储由RDS PostgreSQL提供支持
 HomePage: 项目首页地址
 Tags: #标签详情
