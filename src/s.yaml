@@ -167,88 +167,88 @@ services:
   #             serviceName: ${vars.service.name}
   #             functionName:  chatglm-portal
   {{ if appName == 'pg-chatglm2-6b-webui'  }} 
-  embedding-service:
-    component: fc
-    actions:
-      post-deploy: 
-        - component: fc nas upload -r ./code/embedding-service/model-repo '/mnt/auto/embedding'
-          path: ./  
-    props:
-      region: ${vars.region}
-      service: ${vars.service}
-      function:
-        handler: index.handler
-        description: embedding service
-        timeout: 7200
-        caPort: 8000
-        layers:
-          - acs:fc:{{region}}:1431999136518149:layers/FastAPI-Python310/versions/1
-          - acs:fc:{{region}}:1431999136518149:layers/NLP-Python310/versions/1
-        customRuntimeConfig:
-          command:
-            - python3
-            - '-u'
-            - app/main.py
-        instanceType: c1
-        runtime: custom.debian10
-        instanceConcurrency: 100
-        cpu: 8
-        memorySize: 32768
-        diskSize: 512
-        environmentVariables:
-          PATH: >-
-            /var/fc/lang/python3.10/bin::/usr/local/bin/apache-maven/bin:/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ruby/bin:/opt/bin:/code:/code/bin
-          PYTHONPATH: /opt/python:/code
-          MODEL_PATH: '/mnt/auto/embedding/${vars.EMBEDDING_MODLE_NAME}'
-        name: 'embedding-function'
-        asyncConfiguration: {}
-        codeUri: './code/embedding-service/source-code/embedding'
-      triggers:
-        - name: httpTrigger
-          description: ''
-          type: http
-          config:
-            methods:
-              - GET
-              - POST
-              - PUT
-              - DELETE
-              - HEAD
-              - OPTIONS
-            authType: anonymous
-            disableURLInternet: false
-      # customDomains:
-      #   - domainName: auto
-      #     protocol: HTTP
-      #     routeConfigs:
-      #       - path: /*
-  embedding-model-download:
-    component: fc
-    actions:
-      pre-deploy:
-        - run: npm i
-          path: ./code/embedding-service/source-code/download-model2nas
-      post-deploy:
-        - component: fc ondemand put --qualifier LATEST --max 1
-        - component: fc invoke --service-name ${vars.service.name}  --function-name embedding-model-download
-        - component: 'fc invoke --service-name ${vars.service.name}  --function-name embedding-function --invocation-type async' # 模型下载完然后触发启动
-    props:
-      region: ${vars.region} # 关于变量的使用方法，可以参考：https://www.serverless-devs.com/serverless-devs/yaml#变量赋值
-      service: ${vars.service}
-      function:
-        name: 'embedding-model-download'
-        description: 'download embedding model to nas'
-        codeUri: './code/embedding-service/source-code/download-model2nas'
-        runtime: nodejs16
-        timeout: 3000
-        memorySize: 3072
-        cpu: 2.0
-        diskSize: 512
-        instanceConcurrency: 100
-        handler: index.handler
-        environmentVariables:
-          region: ${vars.region}
-          EMBEDDING_MODEL_NAME: ${vars.EMBEDDING_MODLE_NAME}
+  # embedding-service:
+  #   component: fc
+  #   actions:
+  #     post-deploy: 
+  #       - component: fc nas upload -r ./code/embedding-service/model-repo '/mnt/auto/embedding'
+  #         path: ./  
+  #   props:
+  #     region: ${vars.region}
+  #     service: ${vars.service}
+  #     function:
+  #       handler: index.handler
+  #       description: embedding service
+  #       timeout: 7200
+  #       caPort: 8000
+  #       layers:
+  #         - acs:fc:{{region}}:1431999136518149:layers/FastAPI-Python310/versions/1
+  #         - acs:fc:{{region}}:1431999136518149:layers/NLP-Python310/versions/1
+  #       customRuntimeConfig:
+  #         command:
+  #           - python3
+  #           - '-u'
+  #           - app/main.py
+  #       instanceType: c1
+  #       runtime: custom.debian10
+  #       instanceConcurrency: 100
+  #       cpu: 8
+  #       memorySize: 32768
+  #       diskSize: 512
+  #       environmentVariables:
+  #         PATH: >-
+  #           /var/fc/lang/python3.10/bin::/usr/local/bin/apache-maven/bin:/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ruby/bin:/opt/bin:/code:/code/bin
+  #         PYTHONPATH: /opt/python:/code
+  #         MODEL_PATH: '/mnt/auto/embedding/${vars.EMBEDDING_MODLE_NAME}'
+  #       name: 'embedding-function'
+  #       asyncConfiguration: {}
+  #       codeUri: './code/embedding-service/source-code/embedding'
+  #     triggers:
+  #       - name: httpTrigger
+  #         description: ''
+  #         type: http
+  #         config:
+  #           methods:
+  #             - GET
+  #             - POST
+  #             - PUT
+  #             - DELETE
+  #             - HEAD
+  #             - OPTIONS
+  #           authType: anonymous
+  #           disableURLInternet: false
+  #     customDomains:
+  #       - domainName: auto
+  #         protocol: HTTP
+  #         routeConfigs:
+  #           - path: /*
+  # embedding-model-download:
+  #   component: fc
+  #   actions:
+  #     pre-deploy:
+  #       - run: npm i
+  #         path: ./code/embedding-service/source-code/download-model2nas
+  #     post-deploy:
+  #       - component: fc ondemand put --qualifier LATEST --max 1
+  #       - component: fc invoke --service-name ${vars.service.name}  --function-name embedding-model-download
+  #       - component: 'fc invoke --service-name ${vars.service.name}  --function-name embedding-function --invocation-type async' # 模型下载完然后触发启动
+  #   props:
+  #     region: ${vars.region} # 关于变量的使用方法，可以参考：https://www.serverless-devs.com/serverless-devs/yaml#变量赋值
+  #     service: ${vars.service}
+  #     function:
+  #       name: 'embedding-model-download'
+  #       description: 'download embedding model to nas'
+  #       codeUri: './code/embedding-service/source-code/download-model2nas'
+  #       runtime: nodejs16
+  #       timeout: 3000
+  #       memorySize: 3072
+  #       cpu: 2.0
+  #       diskSize: 512
+  #       instanceConcurrency: 100
+  #       handler: index.handler
+  #       environmentVariables:
+  #         region: ${vars.region}
+  #         EMBEDDING_MODEL_NAME: ${vars.EMBEDDING_MODLE_NAME}
   pgvector_llm-pgvector_llm:
     component: fc
     props:
@@ -280,7 +280,7 @@ services:
         initializationTimeout: 100
         memorySize: 4096
         environmentVariables:
-          CHATGLM_EMBEDDING_URL: ${embedding-service.output.url.system_intranet_url}
+          CHATGLM_EMBEDDING_URL: http://embedding.serverless-developer.com #${embedding-service.output.url.system_intranet_url}
           CHATGLM_BASE_URL: ${chatglm6b-server.output.url.system_intranet_url}
         name: pgvector_llm
         asyncConfiguration: {}
